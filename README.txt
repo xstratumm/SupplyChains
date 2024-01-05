@@ -16,9 +16,9 @@ http://webcache.googleusercontent.com/search?q=cache:https://medium.com/swlh/cre
 Project launch:
 0. pip install -r requirements.txt
 1. Start (empty for the first time) Neo4J SupplyChains database and
-change NEOMODEL_NEO4J_BOLT_URL in supply_chains/settings.py
+change NEOMODEL_NEO4J_BOLT_URL in supply_chains/settings.py (username neo4j and passwd used when creating db)
 2. python manage.py runserver
-3. Open client/index.html
+3. Start localhost:8000 in your browser
 
 After editing models.py run:
 python manage.py install_labels
