@@ -3,14 +3,14 @@ from neomodel import StructuredRel, StructuredNode, IntegerProperty, \
     ArrayProperty, StringProperty, BooleanProperty, RelationshipTo
 
 
-"""Relationship between two SupplyNodes.
-
-Attributes:
-    parent: An integer id of source node.
-    child: An integer id of target node.
-    transfered_res: A list of transfered resources (list of strings of dicts).
-"""
 class SupplyNodesRel(StructuredRel):
+    """Relationship between two SupplyNodes.
+
+    Attributes:
+        parent: An integer id of source node.
+        child: An integer id of target node.
+        transfered_res: A list of transfered resources (list of strings of dicts).
+    """
     parent = IntegerProperty()
     child = IntegerProperty()
     transfered_res = ArrayProperty()
@@ -24,17 +24,17 @@ class SupplyNodesRel(StructuredRel):
         }
 
 
-"""Primary SupplyChain element.
-
-Attributes:
-    node_id: An integer id.
-    entry_point: A boolean of whether it's entry point.
-    exit_point: A boolean of whether it's exit point.
-    needed_res: A list of required resources (list of strings of dicts).
-    give_res: A list of produced resources (list of strings of dicts).
-    connectedTo: A relationship with another SupplyNode.
-"""
 class SupplyNode(StructuredNode):
+    """Primary SupplyChain element.
+
+    Attributes:
+        node_id: An integer id.
+        entry_point: A boolean of whether it's entry point.
+        exit_point: A boolean of whether it's exit point.
+        needed_res: A list of required resources (list of strings of dicts).
+        give_res: A list of produced resources (list of strings of dicts).
+        connectedTo: A relationship with another SupplyNode.
+    """
     title = StringProperty()
     node_id = IntegerProperty()
     entry_point = BooleanProperty()
