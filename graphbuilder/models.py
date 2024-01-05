@@ -15,6 +15,14 @@ class SupplyNodesRel(StructuredRel):
     child = IntegerProperty()
     transfered_res = ArrayProperty()
 
+    @property
+    def serialize(self):
+        return {
+            'source': str(self.parent),
+            'target': str(self.child),
+            'transferedRes': self.transfered_res,
+        }
+
 
 """Primary SupplyChain element.
 

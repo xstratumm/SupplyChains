@@ -1,16 +1,15 @@
-// "use strict";
+"use strict";
 
 let xhr = new XMLHttpRequest();
 xhr.open("GET", "api/getnodes", false)
-// xhr.responseType = "json";
 xhr.send();
-// console.log(nodes);
-// console.log(typeof nodes);
-// console.log(typeof JSON.parse(nodes));
-// console.log(JSON.parse(xhr.response));
 let nodes = JSON.parse(xhr.response);
 
-let links = [{ source: "1", target: "2", transferedRes: [{ name: "iron plate", quantity: 1 }] }, { source: "0", target: "1", transferedRes: [{ name: "iron ore", quantity: 1 }, { name: "coal", quantity: 1 }] }, { source: "2", target: "3", transferedRes: [{ name: "shit made of iron", quantity: 1 }] }];
+xhr = new XMLHttpRequest();
+xhr.open("GET", "api/getlinks", false)
+xhr.send();
+let links = JSON.parse(xhr.response);
+
 let graph = { nodes: nodes, links: links };
 
 function arrResToUL(arr, s) {
@@ -647,3 +646,12 @@ document.getElementById("changeNodeWindowButton").addEventListener("click", func
     graph.nodes[event.target.getAttribute("changing")] = node;
     drawGraph(graph);
 });
+
+
+// nodes = [{ "id": "0", "entryPoint": true, "exitPoint": false, "neededRes": [], "giveRes": [{ "name": "iron ore", "quantity": 1 }, { "name": "coal", "quantity": 1 }] }, { "id": "1", "entryPoint": false, "exitPoint": false, "neededRes": [{ "name": "iron ore", "quantity": 1 }, { "name": "coal", "quantity": 1 }], "giveRes": [{ "name": "iron plate", "quantity": 1 }] }, { "id": "2", "entryPoint": false, "exitPoint": false, "neededRes": [{ "name": "iron plate", "quantity": 1 }], "giveRes": [{ "name": "shit made of iron", "quantity": 1 }] }, { "id": "3", "entryPoint": false, "exitPoint": true, "neededRes": [{ "name": "shit made of iron", "quantity": 1 }], "giveRes": [] }];
+// links = [{ "source": "1", "target": "2", "transferedRes": [{ "name": "iron plate", "quantity": 1 }] }, { "source": "0", "target": "1", "transferedRes": [{ "name": "iron ore", "quantity": 1 }, { "name": "coal", "quantity": 1 }] }, { "source": "2", "target": "3", "transferedRes": [{ "name": "shit made of iron", "quantity": 1 }] }];
+// graph = { nodes: nodes, links: links };
+// xhr = new XMLHttpRequest();
+// xhr.open("POST", "api/savegraph", false);
+// xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+// xhr.send(JSON.stringify(graph));

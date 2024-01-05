@@ -2,17 +2,41 @@ from .models import SupplyNode
 import json
 
 
-def serialize_res(node):
-    """Convert node resources from strings to dicts.
+def decode_res(res_code):
+    return {
+            1: "water",
+            2: "stone",
+            3: "iron",
+            4: "shit",
+            5: "fire",
+            6: "buttplug",
+            }[res_code]
+
+
+def res_dict(res_code, quantity):
+    return {"name": decode_res(res_code), "quantity": quantity}
+
+
+def serialize_res(obj, mode):
+    """Convert node or link resources from strings to dicts.
     
+    Args:
+        obj: SupplyNode or SupplyNodesRel.
+        mode: String "node" or "link".
+
     Returns:
-        Modified node.
+        Modified node or link.
     """
-    for res in ("neededRes", "giveRes"):
-        node[res] = list(map(json.loads, 
-                            map(lambda res: res.replace("'", '"'),
-                                node[res])))
-    return node
+    if mode == "node":
+        for res_type in ("neededRes", "giveRes"):
+            obj[res_type] = list(map(json.loads, 
+                                    map(lambda res: res.replace("'", '"'),
+                                        obj[res_type])))
+    else:
+        obj["transferedRes"] = list(map(json.loads, 
+                                        map(lambda res: res.replace("'", '"'),
+                                            obj["transferedRes"])))
+    return obj
 
 def get_new_id():
     """Generate new SupplyNode id.
