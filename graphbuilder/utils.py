@@ -1,4 +1,4 @@
-from .models import SupplyNode
+from .models import SupplyNode, InputNode, OutputNode
 import json
 
 
@@ -57,12 +57,23 @@ def add_nodes(nodes):
         nodes: List of nodes.
     """
     for node in nodes:
-        SupplyNode(title=f'Unit {node["id"]}',
-                   node_id=node["id"],
-                   entry_point=node["entryPoint"],
-                   exit_point=node["exitPoint"],
-                   needed_res=list(map(str, node["neededRes"])),
-                   give_res=list(map(str, node["giveRes"]))).save()
+        if "entryPoint" in node:
+            InputNode(title=f'Input ({node["id"]})',
+                    node_id=node["id"],
+                    entry_point=node["entryPoint"],
+                    needed_res=list(map(str, node["neededRes"])),
+                    give_res=list(map(str, node["giveRes"]))).save()
+        elif "exitPoint" in node:
+            OutputNode(title=f'Output ({node["id"]})',
+                    node_id=node["id"],
+                    exit_point=node["exitPoint"],
+                    needed_res=list(map(str, node["neededRes"])),
+                    give_res=list(map(str, node["giveRes"]))).save()
+        else:
+            SupplyNode(title=f'Node {node["id"]}',
+                    node_id=node["id"],
+                    needed_res=list(map(str, node["neededRes"])),
+                    give_res=list(map(str, node["giveRes"]))).save()
 
 
 def add_links(links):

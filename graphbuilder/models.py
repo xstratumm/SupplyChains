@@ -37,8 +37,6 @@ class SupplyNode(StructuredNode):
     """
     title = StringProperty()
     node_id = IntegerProperty()
-    entry_point = BooleanProperty()
-    exit_point = BooleanProperty()
     needed_res = ArrayProperty()
     give_res = ArrayProperty()
 
@@ -48,8 +46,22 @@ class SupplyNode(StructuredNode):
     def serialize(self):
         return {
             'id': str(self.node_id),
-            'entryPoint': self.entry_point,
-            'exitPoint': self.exit_point,
             'neededRes': self.needed_res,
             'giveRes': self.give_res,
         }
+
+
+class InputNode(SupplyNode):
+    entry_point = BooleanProperty()
+
+    @property
+    def serialize(self):
+        return super().serialize | {'entryPoint': self.entry_point}
+
+
+class OutputNode(SupplyNode):
+    exit_point = BooleanProperty()
+
+    @property
+    def serialize(self):
+        return super().serialize | {'exitPoint': self.exit_point}

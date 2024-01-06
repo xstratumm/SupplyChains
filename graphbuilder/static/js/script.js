@@ -1,15 +1,23 @@
 "use strict";
 
-let xhr = new XMLHttpRequest();
-xhr.open("GET", "api/getnodes", false)
-xhr.send();
-let nodes = JSON.parse(xhr.response);
+function apiRequest(reqType, URL, data) {
+    let xhr = new XMLHttpRequest();
+    xhr.open(reqType, URL, false);
 
-xhr = new XMLHttpRequest();
-xhr.open("GET", "api/getlinks", false)
-xhr.send();
-let links = JSON.parse(xhr.response);
+    if (reqType == "POST") {
+        xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+        xhr.send(JSON.stringify(data));
+    }
 
+    else {
+        xhr.send();
+    }
+    
+    return JSON.parse(xhr.response);
+}
+
+let nodes = apiRequest("GET", "api/getnodes");
+let links = apiRequest("GET", "api/getlinks");
 let graph = { nodes: nodes, links: links };
 
 function arrResToUL(arr, s) {
@@ -86,7 +94,7 @@ function drawGraph(graph) {
     });
     graph.nodes.forEach((element, index) => {
         let modal = undefined;
-        if (element.entryPoint != false) {
+        if (element.entryPoint != undefined) {
             element.fx = 0;
             element.fy = -height / 2 + radius;
             nodesEl.push(document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject'));
@@ -99,7 +107,7 @@ function drawGraph(graph) {
             innerDiv.innerHTML = arrResToUL(element.giveRes, 'class = "entryExitPoint"');
             nodesEl[index].appendChild(innerDiv);
         } else
-        if (element.exitPoint != false) {
+        if (element.exitPoint != undefined) {
             element.fx = 0;
             element.fy = height / 2 - radius;
             nodesEl.push(document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject'));
@@ -648,10 +656,11 @@ document.getElementById("changeNodeWindowButton").addEventListener("click", func
 });
 
 
-// nodes = [{ "id": "0", "entryPoint": true, "exitPoint": false, "neededRes": [], "giveRes": [{ "name": "iron ore", "quantity": 1 }, { "name": "coal", "quantity": 1 }] }, { "id": "1", "entryPoint": false, "exitPoint": false, "neededRes": [{ "name": "iron ore", "quantity": 1 }, { "name": "coal", "quantity": 1 }], "giveRes": [{ "name": "iron plate", "quantity": 1 }] }, { "id": "2", "entryPoint": false, "exitPoint": false, "neededRes": [{ "name": "iron plate", "quantity": 1 }], "giveRes": [{ "name": "shit made of iron", "quantity": 1 }] }, { "id": "3", "entryPoint": false, "exitPoint": true, "neededRes": [{ "name": "shit made of iron", "quantity": 1 }], "giveRes": [] }];
+// nodes = [{ "id": "0", "entryPoint": true, "neededRes": [], "giveRes": [{ "name": "iron ore", "quantity": 1 }, { "name": "coal", "quantity": 1 }] }, { "id": "1", "neededRes": [{ "name": "iron ore", "quantity": 1 }, { "name": "coal", "quantity": 1 }], "giveRes": [{ "name": "iron plate", "quantity": 1 }] }, { "id": "2", "neededRes": [{ "name": "iron plate", "quantity": 1 }], "giveRes": [{ "name": "shit made of iron", "quantity": 1 }] }, { "id": "3", "exitPoint": true, "neededRes": [{ "name": "shit made of iron", "quantity": 1 }], "giveRes": [] }];
 // links = [{ "source": "1", "target": "2", "transferedRes": [{ "name": "iron plate", "quantity": 1 }] }, { "source": "0", "target": "1", "transferedRes": [{ "name": "iron ore", "quantity": 1 }, { "name": "coal", "quantity": 1 }] }, { "source": "2", "target": "3", "transferedRes": [{ "name": "shit made of iron", "quantity": 1 }] }];
 // graph = { nodes: nodes, links: links };
 // xhr = new XMLHttpRequest();
 // xhr.open("POST", "api/savegraph", false);
 // xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
 // xhr.send(JSON.stringify(graph));
+// apiRequest("POST", "api/savegraph", graph);
