@@ -4,7 +4,22 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from neomodel import db
-from .utils import serialize_res, add_nodes, add_links
+from .utils import serialize_res, add_nodes, \
+    add_links, validate_graph, estimate_graph
+
+
+@api_view(['POST'])
+def api_estimate_graph(request):
+    """API function to calculate leak and excess, find optimal nodes.
+    
+    Returns:
+        Graph analysis info or "incorrect" string.
+    """
+    nodes, links = request.data["nodes"], request.data["links"]
+    if not validate_graph(nodes, links):
+        return Response("incorrect")
+    
+    return Response(estimate_graph(nodes, links))
 
 
 @api_view(['POST'])
@@ -14,12 +29,16 @@ def api_save_graph(request):
     Returns:
         Django REST status response.
     """
+    nodes, links = request.data["nodes"], request.data["links"]
+    if not validate_graph(nodes, links):
+        return Response("incorrect")
 
+    print("here")
     _, _ = db.cypher_query("MATCH (n) DETACH DELETE n")
-    add_nodes(request.data["nodes"])
-    add_links(request.data["links"])
+    add_nodes(nodes)
+    add_links(links)
 
-    return Response()
+    return Response("correct")
 
 
 @api_view(['GET'])
@@ -49,7 +68,7 @@ def api_get_links(request):
 
 
 def index(request):
-    """View function for home page of site.
+    """Home page.
 
     Returns:
         Rendered HTML-page.
