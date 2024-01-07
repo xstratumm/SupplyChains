@@ -5,7 +5,22 @@ from rest_framework.response import Response
 from rest_framework import status
 from neomodel import db
 from .utils import serialize_res, add_nodes, \
-    add_links, validate_graph, estimate_graph
+    add_links, validate_graph, estimate_graph, \
+    optimize_graph
+
+
+@api_view(['POST'])
+def api_optimize_graph(request):
+    """API function to make graph optimization.
+    
+    Returns:
+        Optimized graph.
+    """
+    nodes, links = request.data["nodes"], request.data["links"]
+    if not validate_graph(nodes, links):
+        return Response("incorrect")
+    
+    return Response(optimize_graph(nodes, links))
 
 
 @api_view(['POST'])
@@ -33,7 +48,6 @@ def api_save_graph(request):
     if not validate_graph(nodes, links):
         return Response("incorrect")
 
-    print("here")
     _, _ = db.cypher_query("MATCH (n) DETACH DELETE n")
     add_nodes(nodes)
     add_links(links)

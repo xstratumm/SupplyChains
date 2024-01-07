@@ -3,10 +3,6 @@ import json
 from time import time
 
 
-def optimize_graph(nodes):
-    pass
-
-
 def estimate_graph(nodes, links):
     """Analyze graph for leaks and excess, find optimal nodes.
 
@@ -50,13 +46,76 @@ def estimate_graph(nodes, links):
             estimation["optimals"] += [node["id"]]
 
     return estimation
+
+
+def optimize_graph(nodes, links):
+    estimation = estimate_graph(nodes, links)
+
+    # Optimizing existing links
+    for link_index, link in enumerate(links):
+        transfered_res = link["transferedRes"]
+
+        source_excess_res = set(estimation[link["source"]]["excess"].keys())
+        target_leak_res = set(estimation[link["target"]]["leak"].keys())
+        for res in source_excess_res.intersection(target_leak_res):
+            if estimation[link["source"]]["excess"][res] <= estimation[link["target"]]["leak"][res]:
+                diff = estimation[link["source"]]["excess"][res]
+            else:
+                diff = estimation[link["target"]]["leak"][res]
+            if res in list(map(lambda link_res: link_res["name"], link["transferedRes"])):
+                link["transferedRes"] = list(map(lambda link_res: link_res if link_res["name"] != res \
+                    else {"name": link_res["name"], "quantity": link_res["quantity"] + diff}, link["transferedRes"]))
+            else:
+                link["transferedRes"] += [{"name": res, "quantity": diff}]
             
+            links[link_index] = link
+            # print(link)
+            estimation = estimate_graph(nodes, links)
+
+    # Creating new links
+    for node in nodes:
+        if node["id"] in estimation["optimals"]:
+            continue
+        
+        if estimation[node["id"]]["leak"]:
+            nodes_with_excess = list(filter(lambda node_excess: True if estimation[node_excess["id"]]["excess"] \
+                and node_excess != node else False, nodes))
+            # Make sure they're not connected
+            for link in links:
+                if node["id"] in (link["source"], link["target"]):
+                    if link["source"] in nodes_with_excess:
+                        nodes_with_excess.remove(link["source"])
+                    if link["target"] in nodes_with_excess:
+                        nodes_with_excess.remove(link["target"])
+
+            for node_excess in nodes_with_excess:
+                node_res = set(estimation[node["id"]]["leak"].keys())
+                node_excess_res = set(estimation[node_excess["id"]]["excess"].keys())
+
+                res_to_add = []
+                for res in node_res.intersection(node_excess_res):
+                    if estimation[node_excess["id"]]["excess"][res] <= estimation[node["id"]]["leak"][res]:
+                        diff = estimation[node_excess["id"]]["excess"][res]
+                    else:
+                        diff = estimation[node["id"]]["leak"][res]
+                    
+                    res_to_add += [{"name": res, "quantity": diff}]
+                
+                if not res_to_add:
+                    continue
+
+                new_link = {"source": node_excess["id"], "target": node["id"], "transferedRes": res_to_add}
+                links += [new_link]
+                # print(new_link)
+                estimation = estimate_graph(nodes, links)
+    
+    return {"nodes": nodes, "links": links}
+
 
 def validate_graph(nodes, links):
     """Validate graph to be correct.
     Graph is incorrect if there're no left resources for parent node to give.
     Graph is incorrect if there're no free space for child node to accept.
-    Graph layer structure also should be kept.
     (All types of errors should be considered at the frontend too to minimize server load).
     Returns:
         Boolean.
@@ -119,11 +178,11 @@ def validate_graph(nodes, links):
                 else:
                     needed_res[res["name"]] -= res["quantity"]
         
-        # Check for satisfying layer structure
-        for link in node_output_links:
-            if list(filter(lambda node: True if node["id"] == link["target"] else False, nodes))[0]["layerNum"] - node["layerNum"] != 1:
-                print(link)
-                return False
+        # # Check for satisfying layer structure
+        # for link in node_output_links:
+        #     if list(filter(lambda node: True if node["id"] == link["target"] else False, nodes))[0]["layerNum"] - node["layerNum"] != 1:
+        #         print(link)
+        #         return False
 
     return True
 
@@ -188,21 +247,21 @@ def add_nodes(nodes):
                     node_id=node["id"],
                     entry_point=node["entryPoint"],
                     needed_res=list(map(str, node["neededRes"])),
-                    give_res=list(map(str, node["giveRes"])),
-                    layer_num=node["layerNum"]).save()
+                    # layer_num=node["layerNum"],
+                    give_res=list(map(str, node["giveRes"])),).save()
         elif "exitPoint" in node:
             OutputNode(title=f'Output ({node["id"]})',
                     node_id=node["id"],
                     exit_point=node["exitPoint"],
                     needed_res=list(map(str, node["neededRes"])),
-                    give_res=list(map(str, node["giveRes"])),
-                    layer_num=node["layerNum"]).save()
+                    # layer_num=node["layerNum"],
+                    give_res=list(map(str, node["giveRes"])),).save()
         else:
             SupplyNode(title=f'Node {node["id"]}',
                     node_id=node["id"],
                     needed_res=list(map(str, node["neededRes"])),
-                    give_res=list(map(str, node["giveRes"])),
-                    layer_num=node["layerNum"]).save()
+                    # layer_num=node["layerNum"],
+                    give_res=list(map(str, node["giveRes"])),).save()
 
 
 def add_links(links):

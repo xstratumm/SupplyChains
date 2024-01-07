@@ -39,7 +39,7 @@ class SupplyNode(StructuredNode):
     node_id = IntegerProperty()
     needed_res = ArrayProperty()
     give_res = ArrayProperty()
-    layer_num = IntegerProperty()
+    # layer_num = IntegerProperty()
 
     connectedTo = RelationshipTo("SupplyNode", "TRANSFER", model=SupplyNodesRel)
 
@@ -49,7 +49,7 @@ class SupplyNode(StructuredNode):
             'id': str(self.node_id),
             'neededRes': self.needed_res,
             'giveRes': self.give_res,
-            'layerNum': self.layer_num,
+            # 'layerNum': self.layer_num,
         }
 
 
