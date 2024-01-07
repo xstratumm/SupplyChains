@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 
 <head>
-    <meta charset="utf-8">
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
-    {% load static %}
+    <meta charset="utf-8"> {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" /> {% load static %}
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
 </head>
 
@@ -28,6 +26,9 @@
     </div>
     <div id="addNodeButtonWrap">
         <button type="button" id="addNodeButton">New node</button>
+    </div>
+    <div id="saveGraphWrap">
+        <button type="button" id="saveGraphButton">Save graph</button>
     </div>
     <div id="contextMenu">
         <button type="button" id="contextMenuButtonChange">Change</button>
@@ -91,11 +92,9 @@
                 <path fill="#9ecae1" d="M 0 0 L 10 5 L 0 10 z" />
             </marker>
         </defs>
-    </svg>
-    {% load static %}
+    </svg> {% load static %}
     <script src="{% static 'js/d3.v4.min.js' %}"></script>
-    {% comment %} {% load static %} {% endcomment %}
-    {% comment %} <script src="{% static 'js/axios.min.js' %}"></script> {% endcomment %}
-    {% load static %}
+    {% comment %} {% load static %} {% endcomment %} {% comment %}
+    <script src="{% static 'js/axios.min.js' %}"></script> {% endcomment %} {% load static %}
     <script src="{% static 'js/script.js' %}"></script>
 </body>
