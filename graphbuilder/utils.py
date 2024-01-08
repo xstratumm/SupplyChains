@@ -52,7 +52,7 @@ def estimate_graph(nodes, links):
 
 def optimize_graph(nodes, links):
     estimation = estimate_graph(nodes, links)
-    optimized_links = []
+    optimized_links, new_links = [], []
 
     # Optimizing existing links
     for link_index, link in enumerate(links):
@@ -110,11 +110,11 @@ def optimize_graph(nodes, links):
 
                 new_link = {"source": node_excess["id"], "target": node["id"], "transferedRes": res_to_add}
                 links += [new_link]
-                optimized_links += [new_link]
+                new_links += [new_link]
                 # print(new_link)
                 estimation = estimate_graph(nodes, links)
     
-    return {"graph": {"nodes": nodes, "links": links}, "optimizedLinks": optimized_links}
+    return {"graph": {"nodes": nodes, "links": links}, "optimizedLinks": optimized_links, "newLinks": new_links}
 
 
 def validate_graph(nodes, links):

@@ -15,6 +15,16 @@ line.link {
     cursor: pointer;
 }
 
+line.optimized {
+    marker-end: url(#arrowOptimized);
+    stroke: #d6d629;
+}
+
+line.new {
+    marker-end: url(#arrowNew);
+    stroke: purple;
+}
+
 .entryExitDiv {
     text-align: center;
     border: 1px #3182bd solid;

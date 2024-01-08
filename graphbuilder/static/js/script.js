@@ -59,7 +59,10 @@ function drawGraph(graph) {
     let radius = 30;
     let svg = document.getElementById('graph');
     svg.innerHTML = `<defs><!-- A marker to be used as an arrowhead -->
-    <marker id="arrow" viewBox="0 0 10 10" refX="4" refY="2.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="#4C8EDA" d="M 0 0 L 5 2.5 L 0 5 z" /></marker></defs>`;
+    <marker id="arrow" viewBox="0 0 10 10" refX="4" refY="2.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="#4C8EDA" d="M 0 0 L 5 2.5 L 0 5 z" /></marker>
+    <marker id="arrowOptimized" viewBox="0 0 10 10" refX="4" refY="2.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="#d6d629" d="M 0 0 L 5 2.5 L 0 5 z" /></marker>
+    <marker id="arrowNew" viewBox="0 0 10 10" refX="4" refY="2.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="purple" d="M 0 0 L 5 2.5 L 0 5 z" /></marker>
+    </defs>`;
     let width = 960,
         height = 500;
     svg.setAttribute('viewBox', (-width / 2) + " " + (-height / 2) + " " + (width) + " " + (height));
@@ -85,6 +88,12 @@ function drawGraph(graph) {
         linksEl[index].line.classList.add("link");
         linksEl[index].line.setAttribute("id", (element.source) + "/" + (element.target));
         linksEl[index].g.appendChild(linksEl[index].line);
+        if (element.optimized == true) {
+            linksEl[index].line.classList.add("optimized");
+        }
+        if (element.new == true) {
+            linksEl[index].line.classList.add("new");
+        }
         svg.appendChild(linksEl[index].g);
 
         let modal = document.createElement("div");
@@ -190,6 +199,8 @@ function drawGraph(graph) {
                 y1 -= Math.sin(angle) * r;
                 y2 += Math.sin(angle) * r;
             }
+            if (simulation.nodes()[link.start].entryPoint == true) y1 = -190;
+            if (simulation.nodes()[link.end].exitPoint == true) y2 = 190;
             link.line.setAttribute("x1", x1);
             link.line.setAttribute("y1", y1);
             link.line.setAttribute("x2", x2);
@@ -751,7 +762,27 @@ document.getElementById("changeNodeWindowButton").addEventListener("click", func
 
 
 document.getElementById("optimizeGraphButton").addEventListener("click", function() {
-    graph = apiRequest("POST", "api/optimizegraph", graph);
+    let response = apiRequest("POST", "api/optimizegraph", graph);
+    if (response == "incorrect") {
+        alert("Graph plohoi");
+        return;
+    }
+    graph = response.graph;
+    links = graph.links;
+    nodes = graph.nodes;
+
+    graph.links.forEach((link, index) => {
+        response.optimizedLinks.forEach((optLink) => {
+            if (optLink.source == link.source && optLink.target == link.target) {
+                graph.links[index].optimized = true;
+            }
+        });
+        response.newLinks.forEach((newLink) => {
+            if (newLink.source == link.source && newLink.target == link.target) {
+                graph.links[index].new = true;
+            }
+        });
+    });
     drawGraph(graph);
 });
 
