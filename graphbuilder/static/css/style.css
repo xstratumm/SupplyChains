@@ -1,6 +1,6 @@
 circle.node {
-    stroke: #3182bd;
-    fill: #9ecae1;
+    stroke: #2870c2;
+    fill: #78afee;
 }
 
 .node {
@@ -9,7 +9,7 @@ circle.node {
 
 line.link {
     fill: none;
-    stroke: #9ecae1;
+    stroke: #4C8EDA;
     stroke-width: 3px;
     marker-end: url(#arrow);
     cursor: pointer;
@@ -22,7 +22,15 @@ line.link {
     width: fit-content;
     max-width: 100%;
     margin: 0 auto;
-    height: 98%;
+    height: calc(100% - 4px);
+}
+
+.entryDiv {
+    border: 2px #569480 solid;
+}
+
+.exitDiv {
+    border: 2px #F16667 solid;
 }
 
 ul {
@@ -33,7 +41,7 @@ ul.entryExitPoint {
     list-style-type: none;
     padding: 0;
     overflow: auto;
-    height: 58px;
+    height: 100%;
 }
 
 svg {

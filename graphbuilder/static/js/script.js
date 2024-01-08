@@ -59,7 +59,7 @@ function drawGraph(graph) {
     let radius = 30;
     let svg = document.getElementById('graph');
     svg.innerHTML = `<defs><!-- A marker to be used as an arrowhead -->
-    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="#9ecae1" d="M 0 0 L 10 5 L 0 10 z" /></marker></defs>`;
+    <marker id="arrow" viewBox="0 0 10 10" refX="4" refY="2.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="#4C8EDA" d="M 0 0 L 5 2.5 L 0 5 z" /></marker></defs>`;
     let width = 960,
         height = 500;
     svg.setAttribute('viewBox', (-width / 2) + " " + (-height / 2) + " " + (width) + " " + (height));
@@ -108,6 +108,7 @@ function drawGraph(graph) {
             nodesEl[index].setAttribute("height", radius * 2);
             let innerDiv = document.createElement('div');
             innerDiv.classList.add('entryExitDiv');
+            innerDiv.classList.add('entryDiv');
             innerDiv.innerHTML = arrResToUL(element.giveRes, 'class = "entryExitPoint"');
             nodesEl[index].appendChild(innerDiv);
             giveN(innerDiv, element.id);
@@ -122,6 +123,7 @@ function drawGraph(graph) {
             nodesEl[index].setAttribute("height", radius * 2);
             let innerDiv = document.createElement('div');
             innerDiv.classList.add('entryExitDiv');
+            innerDiv.classList.add('exitDiv');
             innerDiv.innerHTML = arrResToUL(element.neededRes, 'class = "entryExitPoint"');
             nodesEl[index].appendChild(innerDiv);
             giveN(innerDiv, element.id);
@@ -744,6 +746,12 @@ document.getElementById("changeNodeWindowButton").addEventListener("click", func
     graph.nodes.forEach((E, i) => {
         if (E.id == node.id) graph.nodes[i] = node;
     });
+    drawGraph(graph);
+});
+
+
+document.getElementById("optimizeGraphButton").addEventListener("click", function() {
+    graph = apiRequest("POST", "api/optimizegraph", graph);
     drawGraph(graph);
 });
 
