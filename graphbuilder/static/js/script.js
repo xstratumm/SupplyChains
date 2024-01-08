@@ -40,6 +40,12 @@ function radians_to_degrees(radians) {
     return radians * (180 / pi);
 }
 
+function giveN(El, n) {
+    El.setAttribute("n", n);
+    if (El.childNodes[0].tagName == undefined) return;
+    El.childNodes.forEach((child) => { giveN(child, n); });
+}
+
 const triggerEvent = (el, eventType, detail) =>
     el.dispatchEvent(new CustomEvent(eventType, { detail }));
 
@@ -102,8 +108,9 @@ function drawGraph(graph) {
             nodesEl[index].setAttribute("height", radius * 2);
             let innerDiv = document.createElement('div');
             innerDiv.classList.add('entryExitDiv');
-            innerDiv.innerHTML = `<div style="position: fixed;height: 100%;width: 100%;" n="` + element.id + `"></div>` + arrResToUL(element.giveRes, 'class = "entryExitPoint"');
+            innerDiv.innerHTML = arrResToUL(element.giveRes, 'class = "entryExitPoint"');
             nodesEl[index].appendChild(innerDiv);
+            giveN(innerDiv, element.id);
         } else
         if (element.exitPoint != undefined) {
             element.fx = 0;
@@ -115,8 +122,9 @@ function drawGraph(graph) {
             nodesEl[index].setAttribute("height", radius * 2);
             let innerDiv = document.createElement('div');
             innerDiv.classList.add('entryExitDiv');
-            innerDiv.innerHTML = `<div style="position: fixed;height: 100%;width: 100%;" n="` + element.id + `"></div>` + arrResToUL(element.neededRes, 'class = "entryExitPoint"');
+            innerDiv.innerHTML = arrResToUL(element.neededRes, 'class = "entryExitPoint"');
             nodesEl[index].appendChild(innerDiv);
+            giveN(innerDiv, element.id);
         } else {
             nodesEl.push(document.createElementNS('http://www.w3.org/2000/svg', 'circle'));
             nodesEl[index].setAttribute("r", radius);
@@ -290,10 +298,12 @@ function drawGraph(graph) {
                 document.getElementById("changeNodeWindowWrap").style.display = "flex";
                 let node = {};
                 let index;
+                let id;
                 graph.nodes.forEach((n, i) => {
                     if (n.id == event.target.id || n.id == event.target.getAttribute("n")) {
                         node = graph.nodes[i];
                         index = i;
+                        id = n.id;
                     };
                 });
                 document.getElementById("changeNodeWindow").childNodes.forEach((child) => {
@@ -352,7 +362,7 @@ function drawGraph(graph) {
                         if (child.innerHTML == resource.name) child.selected = "true";
                     });
                 });
-                document.getElementById("changeNodeWindowButton").setAttribute("changing", index);
+                document.getElementById("changeNodeWindowButton").setAttribute("changing", id);
             };
         });
     });
@@ -731,7 +741,9 @@ document.getElementById("changeNodeWindowButton").addEventListener("click", func
 
     document.getElementById("changeNodeWindowWrap").style.display = "none";
 
-    graph.nodes[event.target.getAttribute("changing")] = node;
+    graph.nodes.forEach((E, i) => {
+        if (E.id == node.id) graph.nodes[i] = node;
+    });
     drawGraph(graph);
 });
 
@@ -764,4 +776,4 @@ document.getElementById("saveGraphButton").addEventListener("click", function() 
 
 // оценка оптимальности
 // "incorrect" либо JSON с оценкой графа
-console.log(apiRequest("POST", "api/estimategraph", graph));
+//console.log(apiRequest("POST", "api/estimategraph", graph));
