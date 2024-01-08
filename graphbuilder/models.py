@@ -51,6 +51,15 @@ class SupplyNode(StructuredNode):
             'giveRes': self.give_res,
             # 'layerNum': self.layer_num,
         }
+    
+    def get_id(self):
+        return self.node_id
+    
+    def get_needed_res(self):
+        return self.needed_res
+    
+    def get_give_res(self):
+        return self.give_res
 
 
 class InputNode(SupplyNode):

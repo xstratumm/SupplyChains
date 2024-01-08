@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 
 <head>
-    <meta charset="utf-8">
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
-    {% load static %}
+    <meta charset="utf-8"> {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" /> {% load static %}
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
 </head>
 
@@ -29,26 +27,29 @@
     <div id="addNodeButtonWrap">
         <button type="button" id="addNodeButton">New node</button>
     </div>
+    <div id="saveGraphWrap">
+        <button type="button" id="saveGraphButton">Save graph</button>
+    </div>
     <div id="contextMenu">
         <button type="button" id="contextMenuButtonChange">Change</button>
         <button type="button" id="contextMenuButtonDelete">Delete</button>
     </div>
     <div id="changeNodeWindowWrap">
         <div id="changeNodeWindow">
-            <div>Resources to eat</div><button type="button" id="changeNodeNewResEats">+</button>
+            <div id="changeNodeNewResEatsText">Resources to eat</div><button type="button" id="changeNodeNewResEats">+</button>
             <ul id="changeNodeResEats">
                 <li>
-                    <input type="number" placeholder="Resource quantity">
+                    <input type="text" placeholder="Resource quantity">
                     <select class="resSelect">
                         <option>-none-</option>
                     </select>
                     <button type="button">X</button>
                 </li>
             </ul>
-            <div>Resources to give</div><button type="button" id="changeNodeNewResGives">+</button>
+            <div id="changeNodeNewResGivesText">Resources to give</div><button type="button" id="changeNodeNewResGives">+</button>
             <ul id="changeNodeResGives">
                 <li>
-                    <input type="number" placeholder="Resource quantity">
+                    <input type="text" placeholder="Resource quantity">
                     <select class="resSelect">
                         <option>-none-</option>
                     </select>
@@ -63,7 +64,7 @@
             <div>Resources to eat</div><button type="button" id="addNodeNewResEats">+</button>
             <ul id="addNodeResEats">
                 <li>
-                    <input type="number" placeholder="Resource quantity">
+                    <input type="text" placeholder="Resource quantity">
                     <select class="resSelect">
                         <option>-none-</option>
                     </select>
@@ -73,7 +74,7 @@
             <div>Resources to give</div><button type="button" id="addNodeNewResGives">+</button>
             <ul id="addNodeResGives">
                 <li>
-                    <input type="number" placeholder="Resource quantity">
+                    <input type="text" placeholder="Resource quantity">
                     <select class="resSelect">
                         <option>-none-</option>
                     </select>
@@ -91,11 +92,9 @@
                 <path fill="#9ecae1" d="M 0 0 L 10 5 L 0 10 z" />
             </marker>
         </defs>
-    </svg>
-    {% load static %}
+    </svg> {% load static %}
     <script src="{% static 'js/d3.v4.min.js' %}"></script>
-    {% comment %} {% load static %} {% endcomment %}
-    {% comment %} <script src="{% static 'js/axios.min.js' %}"></script> {% endcomment %}
-    {% load static %}
+    {% comment %} {% load static %} {% endcomment %} {% comment %}
+    <script src="{% static 'js/axios.min.js' %}"></script> {% endcomment %} {% load static %}
     <script src="{% static 'js/script.js' %}"></script>
 </body>

@@ -1,6 +1,8 @@
 from .models import SupplyNode, InputNode, OutputNode
+from neomodel import db
 import json
 from time import time
+import re
 
 
 def estimate_graph(nodes, links):
@@ -116,11 +118,85 @@ def validate_graph(nodes, links):
     """Validate graph to be correct.
     Graph is incorrect if there're no left resources for parent node to give.
     Graph is incorrect if there're no free space for child node to accept.
-    (All types of errors should be considered at the frontend too to minimize server load).
+    Graph is incorrect if there're no vertices connected to themselves.
+    Graph is incorrect if there're incoming links to InputNode or there're outcoming links from OutputNode.
+    Graph is incorrect if count of InputNodes not equals one (same for OutputNodes).
+    Graph is incorrect if resource quantities are not integers.
+    Graph is incorrect if not all nodes have minimum one input link and one output link.
+    Graph is incorrect if there're several links between two nodes.
+    (All types of errors should be considered at the frontend first to minimize server load).
     Returns:
-        Boolean.
+        True if graph is correct else False.
     """
+    # Check if there're several links between two nodes
+    if len([{link["source"], link["target"]} for link in links]) != len(set([frozenset((link["source"], link["target"])) for link in links])):
+        return False
+
+    # nodes_set = set([node["id"] for node in nodes])
+    # input_node, _ = db.cypher_query("MATCH (n) WHERE n.entry_point = true RETURN n", resolve_objects=True)
+    # output_node, _ = db.cypher_query("MATCH (n) WHERE n.exit_point = true RETURN n", resolve_objects=True)
+    # nodes_set.remove(input_node[0][0].get_id())
+    # nodes_set.remove(output_node[0][0].get_id())
+
+    # Check if all nodes have minimum one input link and one output link
     for node in nodes:
+        # Input and Output nodes are checked separately
+        if "entryPoint" in node:
+            if not list(filter(lambda link: True if link["source"] == node["id"] else False, links)):
+                return False
+            continue
+        
+        elif "exitPoint" in node:
+            if not list(filter(lambda link: True if link["target"] == node["id"] else False, links)):
+                return False
+            continue
+
+        # node_links, _ = db.cypher_query(f"MATCH (a)-[r]-(b) WHERE a.node_id={node['id']} RETURN r")
+        node_links = list(filter(lambda link: True if node["id"] in (link["source"], link["target"]) else False, links))
+        check_source = False
+        check_target = False
+        
+        for link in node_links:
+            if node["id"] == link["source"]:
+                check_source = True
+            if node["id"] == link["target"]:
+                check_target = True
+            if check_source and check_target:
+                break
+        if not check_source or not check_target:
+            return False
+        
+    # Check if there're only one entry_point and only one exit_point
+    count_entries, _ = db.cypher_query("MATCH (n) WHERE n.entry_point = true RETURN count(*)")
+    count_exits, _ = db.cypher_query("MATCH (n) WHERE n.exit_point = true RETURN count(*)")
+    if count_entries[0][0] != 1 or count_exits[0][0] != 1:
+        # print("entries: " + str(count_entries[0][0]))
+        # print("exits: " + str(count_exits[0][0]))
+        return False
+
+    # No vertices connected to themselves
+    for link in links:
+        if link["source"] == link["target"]:
+            return False
+        # Check for incoming links to InputNode or outcoming links from OutputNode
+        entry_point, _ = db.cypher_query("MATCH(n) WHERE n.entry_point = true RETURN n", resolve_objects=True)
+        exit_point, _ = db.cypher_query("MATCH(n) WHERE n.exit_point = true RETURN n", resolve_objects=True)
+        if link["target"] == str(entry_point[0][0].get_id()) \
+            or link["source"] == str(exit_point[0][0].get_id()):
+            return False
+        # Check resource quantities are all integers (link check)
+        for res in link["transferedRes"]:
+            if re.match(r"\d*", str(res["quantity"])).group(0) != str(res["quantity"]):
+                print(res)
+                return False
+
+    for node in nodes:
+        # Check resource quantities are all integers (node check)
+        for res in node["neededRes"] + node["giveRes"]:
+            if re.match(r"\d*", str(res["quantity"])).group(0) != str(res["quantity"]):
+                print(res)
+                return False
+
         node_output_links = list(filter(lambda link: True if link["source"] == node["id"] else False, links))
         give_res = {res["name"]: res["quantity"] for res in node["giveRes"]}
         for link in node_output_links:
@@ -195,7 +271,7 @@ def decode_res(res_code):
             4: "shit",
             5: "fire",
             6: "buttplug",
-            }[res_code]
+           }[res_code]
 
 
 def res_dict(res_code, quantity):
@@ -222,6 +298,7 @@ def serialize_res(obj, mode):
                                         map(lambda res: res.replace("'", '"'),
                                             obj["transferedRes"])))
     return obj
+
 
 def get_new_id():
     """Generate new SupplyNode id.
