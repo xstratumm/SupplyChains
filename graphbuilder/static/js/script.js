@@ -53,7 +53,7 @@ function drawGraph(graph) {
     let radius = 30;
     let svg = document.getElementById('graph');
     svg.innerHTML = `<defs><!-- A marker to be used as an arrowhead -->
-    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="#9ecae1" d="M 0 0 L 10 5 L 0 10 z" /></marker></defs>`;
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="#9ecae1" d="M 0 0 L 10 5 L 0 10 z" /></marker></defs>`;
     let width = 960,
         height = 500;
     svg.setAttribute('viewBox', (-width / 2) + " " + (-height / 2) + " " + (width) + " " + (height));
@@ -84,7 +84,7 @@ function drawGraph(graph) {
         let modal = document.createElement("div");
         modal.classList.add("modal")
             //modal.style.display = "none";
-        modal.style.position = "absolute";
+        modal.style.position = "fixed";
         modal.innerHTML = '<div style="margin: 0 auto; width: fit-content; height: 20px;"><svg style="margin: 0 auto; width: 20px; height: 20px;"><path fill="#e3f4ff" d="M 0 20 L 10 0 L 20 20 z" /></svg></div>'
         modal.innerHTML += '<div style="background-color: #e3f4ff;">' + "Transfers:" + arrResToUL(element.transferedRes, "") + "</div>";
         modalsLinks.push(modal);
@@ -102,7 +102,7 @@ function drawGraph(graph) {
             nodesEl[index].setAttribute("height", radius * 2);
             let innerDiv = document.createElement('div');
             innerDiv.classList.add('entryExitDiv');
-            innerDiv.innerHTML = arrResToUL(element.giveRes, 'class = "entryExitPoint"');
+            innerDiv.innerHTML = `<div style="position: fixed;height: 100%;width: 100%;" n="` + element.id + `"></div>` + arrResToUL(element.giveRes, 'class = "entryExitPoint"');
             nodesEl[index].appendChild(innerDiv);
         } else
         if (element.exitPoint != undefined) {
@@ -115,7 +115,7 @@ function drawGraph(graph) {
             nodesEl[index].setAttribute("height", radius * 2);
             let innerDiv = document.createElement('div');
             innerDiv.classList.add('entryExitDiv');
-            innerDiv.innerHTML = arrResToUL(element.neededRes, 'class = "entryExitPoint"');
+            innerDiv.innerHTML = `<div style="position: fixed;height: 100%;width: 100%;" n="` + element.id + `"></div>` + arrResToUL(element.neededRes, 'class = "entryExitPoint"');
             nodesEl[index].appendChild(innerDiv);
         } else {
             nodesEl.push(document.createElementNS('http://www.w3.org/2000/svg', 'circle'));
@@ -124,7 +124,7 @@ function drawGraph(graph) {
             modal = document.createElement("div");
             modal.classList.add("modal")
                 //modal.style.display = "none";
-            modal.style.position = "absolute";
+            modal.style.position = "fixed";
             modal.innerHTML = '<div style="margin: 0 auto; width: fit-content; height: 20px;"><svg style="margin: 0 auto; width: 20px; height: 20px;"><path fill="#e3f4ff" d="M 0 20 L 10 0 L 20 20 z" /></svg></div>'
             modal.innerHTML += '<div style="background-color: #e3f4ff;">' + "Eats:" + arrResToUL(element.neededRes, "") + "Provides:" + arrResToUL(element.giveRes, "") + "</div>";
         }
@@ -252,10 +252,30 @@ function drawGraph(graph) {
             let boundBox = node.getBoundingClientRect();
             menu.style.top = (boundBox.top + boundBox.bottom) / 2 + "px";
             menu.style.left = (boundBox.left + boundBox.right + 100) / 2 + "px";
+            document.getElementById("contextMenuButtonDelete").disabled = false;
+            graph.nodes.forEach((node, index) => {
+                if (node.id == event.target.id || event.target.getAttribute("n") == node.id) {
+                    if (node.entryPoint == true || node.exitPoint == true) {
+                        document.getElementById("contextMenuButtonDelete").disabled = true;
+                        return;
+                    }
+                }
+            });
             document.getElementById("contextMenuButtonDelete").onclick = function() {
+                let isEntryExit = 0;
                 graph.nodes.forEach((node, index) => {
-                    if (node.id == event.target.id) graph.nodes.splice(index, 1);
+                    if (node.id == event.target.id || event.target.getAttribute("n") == node.id) {
+                        if (node.entryPoint == true || node.exitPoint == true) {
+                            isEntryExit = 1;
+                            return;
+                        }
+                        graph.nodes.splice(index, 1);
+                    }
                 });
+                if (isEntryExit) {
+                    menu.style.display = "none";
+                    return;
+                }
                 for (let i = 0; i < graph.links.length; i++) {
                     if (graph.links[i].source == event.target.id || graph.links[i].target == event.target.id) {
                         graph.links.splice(i, 1);
@@ -271,11 +291,27 @@ function drawGraph(graph) {
                 let node = {};
                 let index;
                 graph.nodes.forEach((n, i) => {
-                    if (n.id == event.target.id) {
+                    if (n.id == event.target.id || n.id == event.target.getAttribute("n")) {
                         node = graph.nodes[i];
                         index = i;
                     };
                 });
+                document.getElementById("changeNodeWindow").childNodes.forEach((child) => {
+                    if (child.style != undefined)
+                        child.style.display = "block";
+                    if (child.tagName == "DIV" || child.tagName == "BUTTON")
+                        child.style.display = "inline";
+                });
+                if (node.entryPoint == true) {
+                    document.getElementById("changeNodeNewResEatsText").style.display = "none";
+                    document.getElementById("changeNodeNewResEats").style.display = "none";
+                    document.getElementById("changeNodeResEats").style.display = "none";
+                }
+                if (node.exitPoint == true) {
+                    document.getElementById("changeNodeNewResGivesText").style.display = "none";
+                    document.getElementById("changeNodeNewResGives").style.display = "none";
+                    document.getElementById("changeNodeResGives").style.display = "none";
+                }
                 let eatsLi = document.querySelectorAll("#changeNodeResEats li");
                 let givesLi = document.querySelectorAll("#changeNodeResGives li");
                 eatsLi.forEach((li, index) => {
@@ -481,7 +517,7 @@ document.getElementById("addNodeResGives").querySelector("button").addEventListe
 
 document.getElementById("addNodeNewResEats").addEventListener("click", function() {
     let li = document.createElement("li");
-    li.innerHTML = `<input type="number" placeholder="Resource quantity"><select class="resSelect"><option>-none-</option></select><button type="button">X</button>`;
+    li.innerHTML = `<input type="text" placeholder="Resource quantity"><select class="resSelect"><option>-none-</option></select><button type="button">X</button>`;
     li.querySelector('button').addEventListener("click", deleteLi);
     let select = li.querySelector("select");
     resources.forEach((resource) => {
@@ -494,7 +530,7 @@ document.getElementById("addNodeNewResEats").addEventListener("click", function(
 
 document.getElementById("addNodeNewResGives").addEventListener("click", function() {
     let li = document.createElement("li");
-    li.innerHTML = `<input type="number" placeholder="Resource quantity"><select class="resSelect"><option>-none-</option></select><button type="button">X</button>`;
+    li.innerHTML = `<input type="text" placeholder="Resource quantity"><select class="resSelect"><option>-none-</option></select><button type="button">X</button>`;
     li.querySelector('button').addEventListener("click", deleteLi);
     let select = li.querySelector("select");
     resources.forEach((resource) => {
@@ -507,16 +543,24 @@ document.getElementById("addNodeNewResGives").addEventListener("click", function
 
 document.getElementById("addNodeWindowButton").addEventListener("click", function() {
     let maxId = "0";
-    graph.nodes.forEach((element) => { if (element.id > maxId) maxId = element.id; });
+    graph.nodes.forEach((element) => { if (parseInt(element.id) > parseInt(maxId)) maxId = element.id; });
     maxId = (parseInt(maxId) + 1) + "";
     let node = { id: maxId };
     node.neededRes = [];
     node.giveRes = [];
     let eatsLi = document.querySelectorAll("#addNodeResEats li");
     let givesLi = document.querySelectorAll("#addNodeResGives li");
+    let isCorrect = 1;
     eatsLi.forEach((li) => {
         let name = li.querySelector("select").value;
-        let quantity = parseInt(li.querySelector("input").value);
+        let quantity = li.querySelector("input").value;
+        if (quantity.match(/\d*/)[0] != quantity && name != "-none-") {
+            isCorrect = 0;
+            li.querySelector("input").classList.add("incorrectNumber");
+        } else {
+            li.querySelector("input").classList.remove("incorrectNumber");
+        }
+        quantity = parseInt(li.querySelector("input").value);
         if (name != "-none-" && quantity != NaN && quantity != 0) {
             let flag = 1;
             node.neededRes.forEach((resource) => {
@@ -532,7 +576,14 @@ document.getElementById("addNodeWindowButton").addEventListener("click", functio
     });
     givesLi.forEach((li) => {
         let name = li.querySelector("select").value;
-        let quantity = parseInt(li.querySelector("input").value);
+        let quantity = li.querySelector("input").value;
+        if (quantity.match(/\d*/)[0] != quantity && name != "-none-") {
+            isCorrect = 0;
+            li.querySelector("input").classList.add("incorrectNumber");
+        } else {
+            li.querySelector("input").classList.remove("incorrectNumber");
+        }
+        quantity = parseInt(li.querySelector("input").value);
         if (name != "-none-" && quantity != NaN && quantity != 0) {
             let flag = 1;
             node.giveRes.forEach((resource) => {
@@ -546,6 +597,10 @@ document.getElementById("addNodeWindowButton").addEventListener("click", functio
             }
         }
     });
+
+    if (!isCorrect) {
+        return;
+    }
 
     eatsLi.forEach((li, index) => {
         if (index > 0)
@@ -584,7 +639,7 @@ document.getElementById("changeNodeResGives").querySelector("button").addEventLi
 
 document.getElementById("changeNodeNewResEats").addEventListener("click", function() {
     let li = document.createElement("li");
-    li.innerHTML = `<input type="number" placeholder="Resource quantity"><select class="resSelect"><option>-none-</option></select><button type="button">X</button>`;
+    li.innerHTML = `<input type="text" placeholder="Resource quantity"><select class="resSelect"><option>-none-</option></select><button type="button">X</button>`;
     li.querySelector('button').addEventListener("click", deleteLi);
     let select = li.querySelector("select");
     resources.forEach((resource) => {
@@ -597,7 +652,7 @@ document.getElementById("changeNodeNewResEats").addEventListener("click", functi
 
 document.getElementById("changeNodeNewResGives").addEventListener("click", function() {
     let li = document.createElement("li");
-    li.innerHTML = `<input type="number" placeholder="Resource quantity"><select class="resSelect"><option>-none-</option></select><button type="button">X</button>`;
+    li.innerHTML = `<input type="text" placeholder="Resource quantity"><select class="resSelect"><option>-none-</option></select><button type="button">X</button>`;
     li.querySelector('button').addEventListener("click", deleteLi);
     let select = li.querySelector("select");
     resources.forEach((resource) => {
@@ -610,13 +665,25 @@ document.getElementById("changeNodeNewResGives").addEventListener("click", funct
 
 document.getElementById("changeNodeWindowButton").addEventListener("click", function(event) {
     let node = { id: event.target.getAttribute("changing") };
+    let nodeOld = {};
+    graph.nodes.forEach((E) => {
+        if (E.id == node.id) nodeOld = JSON.parse(JSON.stringify(E));
+    });
     node.neededRes = [];
     node.giveRes = [];
     let eatsLi = document.querySelectorAll("#changeNodeResEats li");
     let givesLi = document.querySelectorAll("#changeNodeResGives li");
+    let isCorrect = 1;
     eatsLi.forEach((li) => {
         let name = li.querySelector("select").value;
-        let quantity = parseInt(li.querySelector("input").value);
+        let quantity = li.querySelector("input").value;
+        if (quantity.match(/\d*/)[0] != quantity && name != "-none-") {
+            isCorrect = 0;
+            li.querySelector("input").classList.add("incorrectNumber");
+        } else {
+            li.querySelector("input").classList.remove("incorrectNumber");
+        }
+        quantity = parseInt(li.querySelector("input").value);
         if (name != "-none-" && quantity != NaN && quantity != 0) {
             let flag = 1;
             node.neededRes.forEach((resource) => {
@@ -632,7 +699,14 @@ document.getElementById("changeNodeWindowButton").addEventListener("click", func
     });
     givesLi.forEach((li) => {
         let name = li.querySelector("select").value;
-        let quantity = parseInt(li.querySelector("input").value);
+        let quantity = li.querySelector("input").value;
+        if (quantity.match(/\d*/)[0] != quantity && name != "-none-") {
+            isCorrect = 0;
+            li.querySelector("input").classList.add("incorrectNumber");
+        } else {
+            li.querySelector("input").classList.remove("incorrectNumber");
+        }
+        quantity = parseInt(li.querySelector("input").value);
         if (name != "-none-" && quantity != NaN && quantity != 0) {
             let flag = 1;
             node.giveRes.forEach((resource) => {
@@ -646,6 +720,14 @@ document.getElementById("changeNodeWindowButton").addEventListener("click", func
             }
         }
     });
+
+    if (!isCorrect) {
+        node = nodeOld;
+        return;
+    }
+
+    if (nodeOld.entryPoint == true) node.entryPoint = true;
+    if (nodeOld.exitPoint == true) node.exitPoint = true;
 
     document.getElementById("changeNodeWindowWrap").style.display = "none";
 
