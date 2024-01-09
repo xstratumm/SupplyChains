@@ -67,6 +67,7 @@ function drawGraph(graph) {
         height = 500;
     svg.setAttribute('viewBox', (-width / 2) + " " + (-height / 2) + " " + (width) + " " + (height));
     let nodesEl = Array();
+    let nodesTextsEl = Array();
     let linksEl = Array();
     let nodesIds = Array();
     let modalsLinks = Array();
@@ -107,6 +108,7 @@ function drawGraph(graph) {
     });
     graph.nodes.forEach((element, index) => {
         let modal = undefined;
+        let textEl = undefined
         if (element.entryPoint != undefined) {
             element.fx = 0;
             element.fy = -height / 2 + radius;
@@ -146,8 +148,11 @@ function drawGraph(graph) {
             modal.style.position = "fixed";
             modal.innerHTML = '<div style="margin: 0 auto; width: fit-content; height: 20px;"><svg style="margin: 0 auto; width: 20px; height: 20px;"><path fill="#e3f4ff" d="M 0 20 L 10 0 L 20 20 z" /></svg></div>'
             modal.innerHTML += '<div style="background-color: #e3f4ff;">' + "Eats:" + arrResToUL(element.neededRes, "") + "Provides:" + arrResToUL(element.giveRes, "") + "</div>";
+            textEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            textEl.innerHTML = element.id;
         }
         modalsNodes.push(modal);
+        nodesTextsEl.push(textEl);
         if (modal != undefined) {
             document.body.insertBefore(modal, svg);
         }
@@ -155,6 +160,9 @@ function drawGraph(graph) {
         nodesEl[index].setAttribute("id", element.id);
         nodesEl[index].setAttribute("fill", "none");
         svg.appendChild(nodesEl[index]);
+        if (textEl != undefined) {
+            svg.appendChild(textEl);
+        }
     });
 
     let linksCopy = JSON.parse(JSON.stringify(links));
@@ -176,6 +184,10 @@ function drawGraph(graph) {
             let modalWidth = modalsNodes[index].getBoundingClientRect().width;
             modalsNodes[index].style.top = (boundBox.top + boundBox.bottom) / 2 + "px";
             modalsNodes[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";
+            let textWidth = nodesTextsEl[index].getBoundingClientRect().width;
+            let textHeight = nodesTextsEl[index].getBoundingClientRect().height;
+            nodesTextsEl[index].setAttribute("x", simulation.nodes()[index].x - textWidth / 2);
+            nodesTextsEl[index].setAttribute("y", simulation.nodes()[index].y + textHeight / 2 - 5);
         }
 
         function changePoseLink(link, index) {
@@ -440,9 +452,11 @@ function setResources(graph, resources) {
 document.getElementById("addResButton").addEventListener("click", function() {
     let input = document.getElementById("addResInput");
     if (input.value == "-none-") {
-        alert("Can't create resource named " + input.value);
+        //alert("Can't create resource named " + input.value);
         return;
     }
+    let audio = new Audio('/static/audio/newres.mp3')
+    audio.play();
     resources.add(input.value);
     let selects = document.querySelectorAll('select.resSelect');
     selects.forEach((select) => {
@@ -462,6 +476,8 @@ document.getElementById("deleteResButton").addEventListener("click", function(ev
     let selected = document.getElementById("deleteResSelect");
     let s = selected.value;
     if (s == "-none-") return;
+    let audio = new Audio('/static/audio/deleteres.mp3')
+    audio.play();
     resources.delete(s);
     let selects = document.querySelectorAll('select.resSelect');
     selects.forEach((select) => {
@@ -493,6 +509,8 @@ document.getElementById("renameResButton").addEventListener("click", function() 
     let s = selected.value;
     let s2 = input.value;
     if (s == "-none-" || s2 == "" || s2 == "-none-") return;
+    let audio = new Audio('/static/audio/renameres.mp3')
+    audio.play();
     input.value = "";
     selected.children[0].selected = "true";
     resources.delete(s);
@@ -523,6 +541,8 @@ document.getElementById("renameResButton").addEventListener("click", function() 
 
 document.getElementById("addNodeButton").addEventListener("click", function() {
     document.getElementById("addNodeWindowWrap").style.display = "flex";
+    let audio = new Audio('/static/audio/addnode.mp3')
+    audio.play();
 });
 
 document.getElementById("addNodeWindowWrap").addEventListener("click", function(event) {
@@ -764,10 +784,20 @@ document.getElementById("changeNodeWindowButton").addEventListener("click", func
 document.getElementById("optimizeGraphButton").addEventListener("click", function() {
     let response = apiRequest("POST", "api/optimizegraph", graph);
     if (response == "incorrect") {
-        alert("Graph plohoi");
+        // alert("Graph plohoi");
+        let audio = new Audio('/static/audio/incorrect.mp3')
+        audio.play();
         return;
     }
+    let oldGraph = graph;
     graph = response.graph;
+    if (JSON.stringify(oldGraph) === JSON.stringify(graph)) {
+        let audio = new Audio('/static/audio/alreadyopt.mp3')
+        audio.play();
+        return;
+    }
+    let audio = new Audio('/static/audio/optimized.mp3')
+    audio.play();
     links = graph.links;
     nodes = graph.nodes;
 
@@ -784,6 +814,16 @@ document.getElementById("optimizeGraphButton").addEventListener("click", functio
         });
     });
     drawGraph(graph);
+});
+
+document.getElementById("addLinkButton").addEventListener("click", function() {
+    document.getElementById("addLinkWindowWrap").style.display = "flex";
+    let audio = new Audio('/static/audio/newlink.mp3');
+    audio.play();
+});
+
+document.getElementById("addLinkWindowWrap").addEventListener("click", function(event) {
+    if (event.target.id == "addLinkWindowWrap") event.target.style.display = "none";
 });
 
 
@@ -806,7 +846,9 @@ document.getElementById("optimizeGraphButton").addEventListener("click", functio
 //links = [{ "source": "0", "target": "1", "transferedRes": [{ "name": "water", "quantity": 2 }, { "name": "stone", "quantity": 1 }] }, { "source": "0", "target": "2", "transferedRes": [{ "name": "fire", "quantity": 3 }, { "name": "iron", "quantity": 4 }] }, { "source": "1", "target": "3", "transferedRes": [{ "name": "iron", "quantity": 1 }] }, { "source": "1", "target": "4", "transferedRes": [{ "name": "buttplug", "quantity": 1 }] }, { "source": "2", "target": "5", "transferedRes": [{ "name": "shit", "quantity": 1 }, { "name": "stone", "quantity": 2 }] }, { "source": "2", "target": "6", "transferedRes": [{ "name": "water", "quantity": 1 }] }, { "source": "3", "target": "7", "transferedRes": [{ "name": "buttplug", "quantity": 5 }] }, { "source": "6", "target": "7", "transferedRes": [{ "name": "iron", "quantity": 1 }] }, { "source": "5", "target": "7", "transferedRes": [{ "name": "shit", "quantity": 2 }] }, { "source": "4", "target": "8", "transferedRes": [{ "name": "fire", "quantity": 1 }] }, { "source": "5", "target": "9", "transferedRes": [{ "name": "shit", "quantity": 8 }, { "name": "water", "quantity": 1 }] }, { "source": "7", "target": "10", "transferedRes": [{ "name": "iron", "quantity": 3 }] }, { "source": "8", "target": "10", "transferedRes": [{ "name": "shit", "quantity": 2 }, { "name": "iron", "quantity": 1 }] }, { "source": "9", "target": "10", "transferedRes": [{ "name": "buttplug", "quantity": 1 }] }]
 //graph = { nodes: nodes, links: links };
 document.getElementById("saveGraphButton").addEventListener("click", function() {
-    alert(apiRequest("POST", "api/savegraph", graph));
+    apiRequest("POST", "api/savegraph", graph);
+    let audio = new Audio('/static/audio/savegraph.mp3');
+    audio.play();
 });
 
 // graph = { nodes: nodes, links: links };

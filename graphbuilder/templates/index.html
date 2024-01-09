@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 
 <head>
-    <meta charset="utf-8"> {% load static %}
+    <meta charset="utf-8"> {% load static %} {% load static %}
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}"> {% load static %}
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
     <link rel="stylesheet" href="{% static 'css/style.css' %}" /> {% load static %}
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
 </head>
@@ -26,6 +29,9 @@
     </div>
     <div id="addNodeButtonWrap">
         <button type="button" id="addNodeButton">New node</button>
+    </div>
+    <div id="addLinkButtonWrap">
+        <button type="button" id="addLinkButton">New link</button>
     </div>
     <div id="saveGraphWrap">
         <button type="button" id="saveGraphButton">Save graph</button>
@@ -85,6 +91,25 @@
                 </li>
             </ul>
             <button id="addNodeWindowButton">Add node</button>
+        </div>
+    </div>
+    <div id="addLinkWindowWrap">
+        <div id="addLinkWindow">
+
+            <div>Source of link<input type="text" id="addLinkSourceInput"></div>
+            <div>Target of link<input type="text" id="addLinkTargetInput"></div>
+
+            <div>Resources to transfer<button type="button" id="addLinkNewRes">+</button></div>
+            <ul id="addLinkRes">
+                <li>
+                    <input type="text" placeholder="Resource quantity">
+                    <select class="resSelect">
+                        <option>-none-</option>
+                    </select>
+                    <button type="button">X</button>
+                </li>
+            </ul>
+            <button id="addLinkWindowButton">Add link</button>
         </div>
     </div>
     <svg id="graph">
