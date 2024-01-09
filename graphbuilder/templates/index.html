@@ -1,8 +1,15 @@
 <!DOCTYPE html>
 
 <head>
-    <meta charset="utf-8"> {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" /> {% load static %}
+    <meta charset="utf-8">
+    {% comment %} {% load static %}
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    {% load static %}
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script> {% endcomment %}
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    {% load static %}
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
 </head>
 
@@ -95,9 +102,11 @@
                 <path fill="#9ecae1" d="M 0 0 L 10 5 L 0 10 z" />
             </marker>
         </defs>
-    </svg> {% load static %}
+    </svg>
+    {% load static %}
     <script src="{% static 'js/d3.v4.min.js' %}"></script>
     {% comment %} {% load static %} {% endcomment %} {% comment %}
-    <script src="{% static 'js/axios.min.js' %}"></script> {% endcomment %} {% load static %}
+    <script src="{% static 'js/axios.min.js' %}"></script> {% endcomment %}
+    {% load static %}
     <script src="{% static 'js/script.js' %}"></script>
 </body>

@@ -59,7 +59,10 @@ function drawGraph(graph) {
     let radius = 30;
     let svg = document.getElementById('graph');
     svg.innerHTML = `<defs><!-- A marker to be used as an arrowhead -->
-    <marker id="arrow" viewBox="0 0 10 10" refX="4" refY="2.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="#4C8EDA" d="M 0 0 L 5 2.5 L 0 5 z" /></marker></defs>`;
+    <marker id="arrow" viewBox="0 0 10 10" refX="4" refY="2.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="#4C8EDA" d="M 0 0 L 5 2.5 L 0 5 z" /></marker>
+    <marker id="arrowOptimized" viewBox="0 0 10 10" refX="4" refY="2.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="#d6d629" d="M 0 0 L 5 2.5 L 0 5 z" /></marker>
+    <marker id="arrowNew" viewBox="0 0 10 10" refX="4" refY="2.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="purple" d="M 0 0 L 5 2.5 L 0 5 z" /></marker>
+    </defs>`;
     let width = 960,
         height = 500;
     svg.setAttribute('viewBox', (-width / 2) + " " + (-height / 2) + " " + (width) + " " + (height));
@@ -85,6 +88,12 @@ function drawGraph(graph) {
         linksEl[index].line.classList.add("link");
         linksEl[index].line.setAttribute("id", (element.source) + "/" + (element.target));
         linksEl[index].g.appendChild(linksEl[index].line);
+        if (element.optimized == true) {
+            linksEl[index].line.classList.add("optimized");
+        }
+        if (element.new == true) {
+            linksEl[index].line.classList.add("new");
+        }
         svg.appendChild(linksEl[index].g);
 
         let modal = document.createElement("div");
@@ -190,6 +199,8 @@ function drawGraph(graph) {
                 y1 -= Math.sin(angle) * r;
                 y2 += Math.sin(angle) * r;
             }
+            if (simulation.nodes()[link.start].entryPoint == true) y1 = -190;
+            if (simulation.nodes()[link.end].exitPoint == true) y2 = 190;
             link.line.setAttribute("x1", x1);
             link.line.setAttribute("y1", y1);
             link.line.setAttribute("x2", x2);
@@ -428,10 +439,12 @@ function setResources(graph, resources) {
 
 document.getElementById("addResButton").addEventListener("click", function() {
     let input = document.getElementById("addResInput");
-    if (input.value == "-none-") {
-        alert("Can't create resource named " + input.value);
+    if (input.value == "-none-" || input.value == "") {
+        // alert("Can't create resource named " + input.value);
         return;
     }
+    let audio = new Audio('/static/audio/newres.mp3')
+    audio.play();
     resources.add(input.value);
     let selects = document.querySelectorAll('select.resSelect');
     selects.forEach((select) => {
@@ -451,6 +464,8 @@ document.getElementById("deleteResButton").addEventListener("click", function(ev
     let selected = document.getElementById("deleteResSelect");
     let s = selected.value;
     if (s == "-none-") return;
+    let audio = new Audio('/static/audio/deleteres.mp3')
+    audio.play();
     resources.delete(s);
     let selects = document.querySelectorAll('select.resSelect');
     selects.forEach((select) => {
@@ -482,6 +497,8 @@ document.getElementById("renameResButton").addEventListener("click", function() 
     let s = selected.value;
     let s2 = input.value;
     if (s == "-none-" || s2 == "" || s2 == "-none-") return;
+    let audio = new Audio('/static/audio/renameres.mp3')
+    audio.play();
     input.value = "";
     selected.children[0].selected = "true";
     resources.delete(s);
@@ -512,6 +529,8 @@ document.getElementById("renameResButton").addEventListener("click", function() 
 
 document.getElementById("addNodeButton").addEventListener("click", function() {
     document.getElementById("addNodeWindowWrap").style.display = "flex";
+    let audio = new Audio('/static/audio/addnode.mp3')
+    audio.play();
 });
 
 document.getElementById("addNodeWindowWrap").addEventListener("click", function(event) {
@@ -751,7 +770,37 @@ document.getElementById("changeNodeWindowButton").addEventListener("click", func
 
 
 document.getElementById("optimizeGraphButton").addEventListener("click", function() {
-    graph = apiRequest("POST", "api/optimizegraph", graph);
+    let response = apiRequest("POST", "api/optimizegraph", graph);
+    if (response == "incorrect") {
+        // alert("Graph plohoi");
+        let audio = new Audio('/static/audio/incorrect.mp3')
+        audio.play();
+        return;
+    }
+    let oldGraph = graph;
+    graph = response.graph;
+    if (JSON.stringify(oldGraph) === JSON.stringify(graph)) {
+        let audio = new Audio('/static/audio/alreadyopt.mp3')
+        audio.play();
+        return;
+    }
+    let audio = new Audio('/static/audio/optimized.mp3')
+    audio.play();
+    links = graph.links;
+    nodes = graph.nodes;
+
+    graph.links.forEach((link, index) => {
+        response.optimizedLinks.forEach((optLink) => {
+            if (optLink.source == link.source && optLink.target == link.target) {
+                graph.links[index].optimized = true;
+            }
+        });
+        response.newLinks.forEach((newLink) => {
+            if (newLink.source == link.source && newLink.target == link.target) {
+                graph.links[index].new = true;
+            }
+        });
+    });
     drawGraph(graph);
 });
 
@@ -775,7 +824,10 @@ document.getElementById("optimizeGraphButton").addEventListener("click", functio
 //links = [{ "source": "0", "target": "1", "transferedRes": [{ "name": "water", "quantity": 2 }, { "name": "stone", "quantity": 1 }] }, { "source": "0", "target": "2", "transferedRes": [{ "name": "fire", "quantity": 3 }, { "name": "iron", "quantity": 4 }] }, { "source": "1", "target": "3", "transferedRes": [{ "name": "iron", "quantity": 1 }] }, { "source": "1", "target": "4", "transferedRes": [{ "name": "buttplug", "quantity": 1 }] }, { "source": "2", "target": "5", "transferedRes": [{ "name": "shit", "quantity": 1 }, { "name": "stone", "quantity": 2 }] }, { "source": "2", "target": "6", "transferedRes": [{ "name": "water", "quantity": 1 }] }, { "source": "3", "target": "7", "transferedRes": [{ "name": "buttplug", "quantity": 5 }] }, { "source": "6", "target": "7", "transferedRes": [{ "name": "iron", "quantity": 1 }] }, { "source": "5", "target": "7", "transferedRes": [{ "name": "shit", "quantity": 2 }] }, { "source": "4", "target": "8", "transferedRes": [{ "name": "fire", "quantity": 1 }] }, { "source": "5", "target": "9", "transferedRes": [{ "name": "shit", "quantity": 8 }, { "name": "water", "quantity": 1 }] }, { "source": "7", "target": "10", "transferedRes": [{ "name": "iron", "quantity": 3 }] }, { "source": "8", "target": "10", "transferedRes": [{ "name": "shit", "quantity": 2 }, { "name": "iron", "quantity": 1 }] }, { "source": "9", "target": "10", "transferedRes": [{ "name": "buttplug", "quantity": 1 }] }]
 //graph = { nodes: nodes, links: links };
 document.getElementById("saveGraphButton").addEventListener("click", function() {
-    alert(apiRequest("POST", "api/savegraph", graph));
+    // alert(apiRequest("POST", "api/savegraph", graph));
+    apiRequest("POST", "api/savegraph", graph);
+    let audio = new Audio('/static/audio/savegraph.mp3');
+    audio.play();
 });
 
 // graph = { nodes: nodes, links: links };
