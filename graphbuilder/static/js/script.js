@@ -60,7 +60,7 @@ function drawGraph(graph) {
     let svg = document.getElementById('graph');
     svg.innerHTML = `<defs><!-- A marker to be used as an arrowhead -->
     <marker id="arrow" viewBox="0 0 10 10" refX="4" refY="2.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="#4C8EDA" d="M 0 0 L 5 2.5 L 0 5 z" /></marker>
-    <marker id="arrowOptimized" viewBox="0 0 10 10" refX="4" refY="2.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="#d6d629" d="M 0 0 L 5 2.5 L 0 5 z" /></marker>
+    <marker id="arrowOptimized" viewBox="0 0 10 10" refX="4" refY="2.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="#ffbb00" d="M 0 0 L 5 2.5 L 0 5 z" /></marker>
     <marker id="arrowNew" viewBox="0 0 10 10" refX="4" refY="2.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="purple" d="M 0 0 L 5 2.5 L 0 5 z" /></marker>
     </defs>`;
     let width = 960,
@@ -186,8 +186,8 @@ function drawGraph(graph) {
             modalsNodes[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";
             let textWidth = nodesTextsEl[index].getBoundingClientRect().width;
             let textHeight = nodesTextsEl[index].getBoundingClientRect().height;
-            nodesTextsEl[index].setAttribute("x", simulation.nodes()[index].x - textWidth / 2);
-            nodesTextsEl[index].setAttribute("y", simulation.nodes()[index].y + textHeight / 2 - 5);
+            nodesTextsEl[index].setAttribute("x", simulation.nodes()[index].x - (textWidth / 3));
+            nodesTextsEl[index].setAttribute("y", simulation.nodes()[index].y + (textHeight / 3) - 5);
         }
 
         function changePoseLink(link, index) {
@@ -211,7 +211,7 @@ function drawGraph(graph) {
                 y1 -= Math.sin(angle) * r;
                 y2 += Math.sin(angle) * r;
             }
-            if (simulation.nodes()[link.start].entryPoint == true) y1 = -190;
+            if (simulation.nodes()[link.start].entryPoint == true) y1 = -194;
             if (simulation.nodes()[link.end].exitPoint == true) y2 = 190;
             link.line.setAttribute("x1", x1);
             link.line.setAttribute("y1", y1);
@@ -401,7 +401,8 @@ function drawGraph(graph) {
             menu.style.left = (boundBox.left + boundBox.right + 50) / 2 + "px";
             document.getElementById("contextMenuButtonDelete").onclick = function() {
                 for (let i = 0; i < graph.links.length; i++) {
-                    if (graph.links[i].source == event.target.id[0] && graph.links[i].target == event.target.id[2]) {
+                    let id = event.target.id.split("/");
+                    if (graph.links[i].source == id[0] && graph.links[i].target == id[1]) {
                         graph.links.splice(i, 1);
                         i--;
                     }
@@ -409,8 +410,53 @@ function drawGraph(graph) {
                 drawGraph(graph);
                 menu.style.display = "none";
             };
+            document.getElementById("contextMenuButtonChange").onclick = function() {
+                menu.style.display = "none";
+                document.getElementById("addLinkWindowButton").innerHTML = "Change link";
+                document.getElementById("addLinkWindowWrap").style.display = "flex";
+                let link = {};
+                let index;
+                let id;
+                graph.links.forEach((l, i) => {
+                    if (l.source + "/" + l.target == event.target.id) {
+                        link = graph.links[i];
+                        index = i;
+                        id = event.target.id;
+                    };
+                });
+                document.getElementById("addLinkSourceInput").parentElement.style.display = "none";
+                document.getElementById("addLinkTargetInput").parentElement.style.display = "none";
+                let transLi = document.querySelectorAll("#addLinkRes li");
+                transLi.forEach((li, index) => {
+                    if (index > 0)
+                        li.parentElement.removeChild(li);
+                    else {
+                        li.querySelector("input").value = "";
+                        li.querySelector("option").selected = "true";
+                    }
+                });
+                link.transferedRes.forEach((resource) => {
+                    triggerEvent(document.getElementById("addLinkNewRes"), "click");
+                });
+                transLi = document.querySelectorAll("#addLinkRes li");
+                link.transferedRes.forEach((resource, index) => {
+                    transLi[index].querySelector("input").value = resource.quantity;
+                    let select = transLi[index].querySelector("select");
+                    select.childNodes.forEach((child) => {
+                        if (child.innerHTML == resource.name) child.selected = "true";
+                    });
+                });
+                document.getElementById("addLinkWindowButton").setAttribute("changing", id);
+            };
         });
     });
+
+
+    graph.links.forEach((link, index) => {
+        graph.links[index].optimized = "";
+        graph.links[index].new = "";
+    });
+
 }
 
 document.getElementById("graph").addEventListener("click", function(event) {
@@ -451,7 +497,7 @@ function setResources(graph, resources) {
 
 document.getElementById("addResButton").addEventListener("click", function() {
     let input = document.getElementById("addResInput");
-    if (input.value == "-none-") {
+    if (input.value == "Choose resource" || input.value == "") {
         //alert("Can't create resource named " + input.value);
         return;
     }
@@ -475,7 +521,7 @@ document.getElementById("addResButton").addEventListener("click", function() {
 document.getElementById("deleteResButton").addEventListener("click", function(event) {
     let selected = document.getElementById("deleteResSelect");
     let s = selected.value;
-    if (s == "-none-") return;
+    if (s == "Choose resource") return;
     let audio = new Audio('/static/audio/deleteres.mp3')
     audio.play();
     resources.delete(s);
@@ -508,7 +554,7 @@ document.getElementById("renameResButton").addEventListener("click", function() 
     let input = document.getElementById("renameResInput");
     let s = selected.value;
     let s2 = input.value;
-    if (s == "-none-" || s2 == "" || s2 == "-none-") return;
+    if (s == "Choose resource" || s2 == "" || s2 == "Choose resource") return;
     let audio = new Audio('/static/audio/renameres.mp3')
     audio.play();
     input.value = "";
@@ -560,9 +606,11 @@ document.getElementById("addNodeResGives").querySelector("button").addEventListe
 
 document.getElementById("addNodeNewResEats").addEventListener("click", function() {
     let li = document.createElement("li");
-    li.innerHTML = `<input type="text" placeholder="Resource quantity"><select class="resSelect"><option>-none-</option></select><button type="button">X</button>`;
+    li.innerHTML = `<input type="text" placeholder="Resource quantity"><select class="resSelect"><option>Choose resource</option></select><button type="button" class="btn">X</button>`;
     li.querySelector('button').addEventListener("click", deleteLi);
+    li.querySelector('button').classList.add("btn");
     let select = li.querySelector("select");
+    select.style.margin = "0 4px";
     resources.forEach((resource) => {
         let option = document.createElement("option");
         option.innerHTML = resource;
@@ -573,9 +621,11 @@ document.getElementById("addNodeNewResEats").addEventListener("click", function(
 
 document.getElementById("addNodeNewResGives").addEventListener("click", function() {
     let li = document.createElement("li");
-    li.innerHTML = `<input type="text" placeholder="Resource quantity"><select class="resSelect"><option>-none-</option></select><button type="button">X</button>`;
+    li.innerHTML = `<input type="text" placeholder="Resource quantity"><select class="resSelect"><option>Choose resource</option></select><button type="button">X</button>`;
     li.querySelector('button').addEventListener("click", deleteLi);
+    li.querySelector('button').classList.add("btn");
     let select = li.querySelector("select");
+    select.style.margin = "0 4px";
     resources.forEach((resource) => {
         let option = document.createElement("option");
         option.innerHTML = resource;
@@ -597,14 +647,14 @@ document.getElementById("addNodeWindowButton").addEventListener("click", functio
     eatsLi.forEach((li) => {
         let name = li.querySelector("select").value;
         let quantity = li.querySelector("input").value;
-        if (quantity.match(/\d*/)[0] != quantity && name != "-none-") {
+        if (quantity.match(/\d*/)[0] != quantity && name != "Choose resource") {
             isCorrect = 0;
             li.querySelector("input").classList.add("incorrectNumber");
         } else {
             li.querySelector("input").classList.remove("incorrectNumber");
         }
         quantity = parseInt(li.querySelector("input").value);
-        if (name != "-none-" && quantity != NaN && quantity != 0) {
+        if (name != "Choose resource" && quantity != NaN && quantity != 0) {
             let flag = 1;
             node.neededRes.forEach((resource) => {
                 if (resource.name == name) {
@@ -620,14 +670,14 @@ document.getElementById("addNodeWindowButton").addEventListener("click", functio
     givesLi.forEach((li) => {
         let name = li.querySelector("select").value;
         let quantity = li.querySelector("input").value;
-        if (quantity.match(/\d*/)[0] != quantity && name != "-none-") {
+        if (quantity.match(/\d*/)[0] != quantity && name != "Choose resource") {
             isCorrect = 0;
             li.querySelector("input").classList.add("incorrectNumber");
         } else {
             li.querySelector("input").classList.remove("incorrectNumber");
         }
         quantity = parseInt(li.querySelector("input").value);
-        if (name != "-none-" && quantity != NaN && quantity != 0) {
+        if (name != "Choose resource" && quantity != NaN && quantity != 0) {
             let flag = 1;
             node.giveRes.forEach((resource) => {
                 if (resource.name == name) {
@@ -682,9 +732,11 @@ document.getElementById("changeNodeResGives").querySelector("button").addEventLi
 
 document.getElementById("changeNodeNewResEats").addEventListener("click", function() {
     let li = document.createElement("li");
-    li.innerHTML = `<input type="text" placeholder="Resource quantity"><select class="resSelect"><option>-none-</option></select><button type="button">X</button>`;
+    li.innerHTML = `<input type="text" placeholder="Resource quantity"><select class="resSelect"><option>Choose resource</option></select><button type="button">X</button>`;
     li.querySelector('button').addEventListener("click", deleteLi);
+    li.querySelector('button').classList.add("btn");
     let select = li.querySelector("select");
+    select.style.margin = "0 4px";
     resources.forEach((resource) => {
         let option = document.createElement("option");
         option.innerHTML = resource;
@@ -695,9 +747,11 @@ document.getElementById("changeNodeNewResEats").addEventListener("click", functi
 
 document.getElementById("changeNodeNewResGives").addEventListener("click", function() {
     let li = document.createElement("li");
-    li.innerHTML = `<input type="text" placeholder="Resource quantity"><select class="resSelect"><option>-none-</option></select><button type="button">X</button>`;
+    li.innerHTML = `<input type="text" placeholder="Resource quantity"><select class="resSelect"><option>Choose resource</option></select><button type="button">X</button>`;
     li.querySelector('button').addEventListener("click", deleteLi);
+    li.querySelector('button').classList.add("btn");
     let select = li.querySelector("select");
+    select.style.margin = "0 4px";
     resources.forEach((resource) => {
         let option = document.createElement("option");
         option.innerHTML = resource;
@@ -720,14 +774,14 @@ document.getElementById("changeNodeWindowButton").addEventListener("click", func
     eatsLi.forEach((li) => {
         let name = li.querySelector("select").value;
         let quantity = li.querySelector("input").value;
-        if (quantity.match(/\d*/)[0] != quantity && name != "-none-") {
+        if (quantity.match(/\d*/)[0] != quantity && name != "Choose resource") {
             isCorrect = 0;
             li.querySelector("input").classList.add("incorrectNumber");
         } else {
             li.querySelector("input").classList.remove("incorrectNumber");
         }
         quantity = parseInt(li.querySelector("input").value);
-        if (name != "-none-" && quantity != NaN && quantity != 0) {
+        if (name != "Choose resource" && quantity != NaN && quantity != 0) {
             let flag = 1;
             node.neededRes.forEach((resource) => {
                 if (resource.name == name) {
@@ -743,14 +797,14 @@ document.getElementById("changeNodeWindowButton").addEventListener("click", func
     givesLi.forEach((li) => {
         let name = li.querySelector("select").value;
         let quantity = li.querySelector("input").value;
-        if (quantity.match(/\d*/)[0] != quantity && name != "-none-") {
+        if (quantity.match(/\d*/)[0] != quantity && name != "Choose resource") {
             isCorrect = 0;
             li.querySelector("input").classList.add("incorrectNumber");
         } else {
             li.querySelector("input").classList.remove("incorrectNumber");
         }
         quantity = parseInt(li.querySelector("input").value);
-        if (name != "-none-" && quantity != NaN && quantity != 0) {
+        if (name != "Choose resource" && quantity != NaN && quantity != 0) {
             let flag = 1;
             node.giveRes.forEach((resource) => {
                 if (resource.name == name) {
@@ -818,6 +872,19 @@ document.getElementById("optimizeGraphButton").addEventListener("click", functio
 
 document.getElementById("addLinkButton").addEventListener("click", function() {
     document.getElementById("addLinkWindowWrap").style.display = "flex";
+    document.getElementById("addLinkSourceInput").parentElement.style.display = "block";
+    document.getElementById("addLinkTargetInput").parentElement.style.display = "block";
+    document.getElementById("addLinkWindowButton").setAttribute("changing", "");
+    document.getElementById("addLinkWindowButton").innerHTML = "Add link";
+    let transLi = document.querySelectorAll("#addLinkRes li");
+    transLi.forEach((li, index) => {
+        if (index > 0)
+            li.parentElement.removeChild(li);
+        else {
+            li.querySelector("input").value = "";
+            li.querySelector("option").selected = "true";
+        }
+    });
     let audio = new Audio('/static/audio/newlink.mp3');
     audio.play();
 });
@@ -826,8 +893,186 @@ document.getElementById("addLinkWindowWrap").addEventListener("click", function(
     if (event.target.id == "addLinkWindowWrap") event.target.style.display = "none";
 });
 
+document.getElementById("addLinkRes").querySelector("button").addEventListener("click", deleteLi);
+
+document.getElementById("addLinkNewRes").addEventListener("click", function() {
+    let li = document.createElement("li");
+    li.innerHTML = `<input type="text" placeholder="Resource quantity"><select class="resSelect"><option>Choose resource</option></select><button type="button">X</button>`;
+    li.querySelector('button').addEventListener("click", deleteLi);
+    li.querySelector('button').classList.add("btn");
+    let select = li.querySelector("select");
+    select.style.margin = "0 4px";
+    resources.forEach((resource) => {
+        let option = document.createElement("option");
+        option.innerHTML = resource;
+        select.appendChild(option);
+    });
+    document.getElementById("addLinkRes").appendChild(li);
+});
+
+document.getElementById("addLinkWindowButton").addEventListener("click", function(event) {
+    if (event.target.getAttribute("changing") == null || event.target.getAttribute("changing") == "") {
+
+        let source = document.getElementById("addLinkSourceInput");
+        let target = document.getElementById("addLinkTargetInput");
+        source.classList.remove("incorrectNumber");
+        target.classList.remove("incorrectNumber");
+        let isCorrect = 1;
+        if (source.value === "") {
+            source.classList.add("incorrectNumber");
+            isCorrect = 0;
+        }
+        if (target.value === "") {
+            target.classList.add("incorrectNumber");
+            isCorrect = 0;
+        }
+        let sourceId = undefined,
+            targetId = undefined;
+        graph.nodes.forEach((node) => {
+            if (node.id == source.value) sourceId = node.id;
+            if (node.id == target.value) targetId = node.id;
+        });
+        if (sourceId == undefined) {
+            source.classList.add("incorrectNumber");
+            isCorrect = 0;
+        }
+        if (targetId == undefined) {
+            target.classList.add("incorrectNumber");
+            isCorrect = 0;
+        }
+        if (target.value == source.value) {
+            source.classList.add("incorrectNumber");
+            target.classList.add("incorrectNumber");
+            isCorrect = 0;
+        }
+        if (!isCorrect) {
+            return;
+        }
+        graph.links.forEach((link) => {
+            if ((sourceId == link.source && targetId == link.target) || ((sourceId == link.target && targetId == link.source))) {
+                source.classList.add("incorrectNumber");
+                target.classList.add("incorrectNumber");
+                isCorrect = 0;
+            }
+        });
+        if (!isCorrect) {
+            return;
+        }
+
+        let link = { "source": sourceId, "target": targetId };
+        link.transferedRes = [];
+        let transLi = document.querySelectorAll("#addLinkRes li");
+        transLi.forEach((li) => {
+            let name = li.querySelector("select").value;
+            let quantity = li.querySelector("input").value;
+            if (quantity.match(/\d*/)[0] != quantity && name != "Choose resource") {
+                isCorrect = 0;
+                li.querySelector("input").classList.add("incorrectNumber");
+            } else {
+                li.querySelector("input").classList.remove("incorrectNumber");
+            }
+            quantity = parseInt(li.querySelector("input").value);
+            if (name != "Choose resource" && quantity != NaN && quantity != 0) {
+                let flag = 1;
+                link.transferedRes.forEach((resource) => {
+                    if (resource.name == name) {
+                        resource.quantity += quantity;
+                        flag = 0;
+                    }
+                });
+                if (flag == 1) {
+                    link.transferedRes.push({ name: name, quantity: quantity });
+                }
+            }
+        });
 
 
+        if (!isCorrect) {
+            return;
+        }
+
+        source.value = "";
+        target.value = "";
+
+        transLi.forEach((li, index) => {
+            if (index > 0)
+                li.parentElement.removeChild(li);
+            else {
+                li.querySelector("input").value = "";
+                li.querySelector("option").selected = "true";
+            }
+        });
+        document.getElementById("addLinkWindowWrap").style.display = "none";
+
+        graph.links.push(link);
+        drawGraph(graph);
+    } else {
+        let ID = event.target.getAttribute("changing").split("/");
+        let link = { source: ID[0], target: ID[1] };
+        let linkOld = {};
+        graph.links.forEach((E) => {
+            if (E.source == link.source && E.target == link.target) linkOld = JSON.parse(JSON.stringify(E));
+        });
+        link.transferedRes = [];
+        let transLi = document.querySelectorAll("#addLinkRes li");
+        let isCorrect = 1;
+        transLi.forEach((li) => {
+            let name = li.querySelector("select").value;
+            let quantity = li.querySelector("input").value;
+            if (quantity.match(/\d*/)[0] != quantity && name != "Choose resource") {
+                isCorrect = 0;
+                li.querySelector("input").classList.add("incorrectNumber");
+            } else {
+                li.querySelector("input").classList.remove("incorrectNumber");
+            }
+            quantity = parseInt(li.querySelector("input").value);
+            if (name != "Choose resource" && quantity != NaN && quantity != 0) {
+                let flag = 1;
+                link.transferedRes.forEach((resource) => {
+                    if (resource.name == name) {
+                        resource.quantity += quantity;
+                        flag = 0;
+                    }
+                });
+                if (flag == 1) {
+                    link.transferedRes.push({ name: name, quantity: quantity });
+                }
+            }
+        });
+
+        if (!isCorrect) {
+            link = linkOld;
+            return;
+        }
+
+        document.getElementById("addLinkWindowWrap").style.display = "none";
+
+        graph.links.forEach((E, i) => {
+            if (E.source == link.source && E.target == link.target) graph.links[i] = link;
+        });
+        drawGraph(graph);
+    }
+});
+
+document.getElementById("saveGraphButton").addEventListener("click", function() {
+    if ("incorrect" == apiRequest("POST", "api/savegraph", graph)) {
+        let audio = new Audio('/static/audio/incorrect.mp3');
+        audio.play();
+        return;
+    }
+    let audio = new Audio('/static/audio/savegraph.mp3');
+    audio.play();
+});
+
+document.getElementById("estimateGraphButton").addEventListener("click", function() {
+    let response = apiRequest("POST", "api/estimategraph", graph);
+    if ("incorrect" == response) {
+        let audio = new Audio('/static/audio/incorrect.mp3');
+        audio.play();
+        return;
+    }
+    document.getElementById("estimation")
+})
 
 // маленький граф (без слоев, не заработает)
 // nodes = [{ "id": "0", "entryPoint": true, "neededRes": [], "giveRes": [{ "name": "iron ore", "quantity": 1 }, { "name": "coal", "quantity": 1 }] }, { "id": "1", "neededRes": [{ "name": "iron ore", "quantity": 1 }, { "name": "coal", "quantity": 1 }], "giveRes": [{ "name": "iron plate", "quantity": 1 }] }, { "id": "2", "neededRes": [{ "name": "iron plate", "quantity": 1 }], "giveRes": [{ "name": "shit made of iron", "quantity": 1 }] }, { "id": "3", "exitPoint": true, "neededRes": [{ "name": "shit made of iron", "quantity": 1 }], "giveRes": [] }];
@@ -845,11 +1090,7 @@ document.getElementById("addLinkWindowWrap").addEventListener("click", function(
 //nodes = [{ "id": "0", "neededRes": [], "giveRes": [{ "name": "water", "quantity": 9 }, { "name": "stone", "quantity": 3 }, { "name": "fire", "quantity": 4 }, { "name": "iron", "quantity": 8 }], "entryPoint": true, "layerNum": 0 }, { "id": "1", "neededRes": [{ "name": "water", "quantity": 2 }, { "name": "stone", "quantity": 1 }], "giveRes": [{ "name": "buttplug", "quantity": 2 }, { "name": "iron", "quantity": 5 }], "layerNum": 1 }, { "id": "2", "neededRes": [{ "name": "fire", "quantity": 3 }, { "name": "iron", "quantity": 4 }], "giveRes": [{ "name": "shit", "quantity": 2 }, { "name": "stone", "quantity": 3 }, { "name": "water", "quantity": 6 }], "layerNum": 1 }, { "id": "3", "neededRes": [{ "name": "iron", "quantity": 1 }], "giveRes": [{ "name": "buttplug", "quantity": 5 }], "layerNum": 2 }, { "id": "4", "neededRes": [{ "name": "buttplug", "quantity": 3 }], "giveRes": [{ "name": "fire", "quantity": 2 }], "layerNum": 2 }, { "id": "5", "neededRes": [{ "name": "stone", "quantity": 2 }, { "name": "shit", "quantity": 1 }], "giveRes": [{ "name": "water", "quantity": 1 }, { "name": "shit", "quantity": 10 }], "layerNum": 2 }, { "id": "6", "neededRes": [{ "name": "shit", "quantity": 3 }, { "name": "water", "quantity": 2 }], "giveRes": [{ "name": "iron", "quantity": 7 }], "layerNum": 2 }, { "id": "7", "neededRes": [{ "name": "iron", "quantity": 1 }, { "name": "buttplug", "quantity": 5 }, { "name": "shit", "quantity": 2 }], "giveRes": [{ "name": "iron", "quantity": 3 }], "layerNum": 3 }, { "id": "8", "neededRes": [{ "name": "fire", "quantity": 5 }], "giveRes": [{ "name": "shit", "quantity": 4 }, { "name": "iron", "quantity": 6 }], "layerNum": 3 }, { "id": "9", "neededRes": [{ "name": "shit", "quantity": 9 }, { "name": "water", "quantity": 5 }], "giveRes": [{ "name": "buttplug", "quantity": 3 }], "layerNum": 3 }, { "id": "10", "neededRes": [{ "name": "iron", "quantity": 4 }, { "name": "shit", "quantity": 2 }, { "name": "buttplug", "quantity": 1 }], "giveRes": [], "exitPoint": true, "layerNum": 4 }]
 //links = [{ "source": "0", "target": "1", "transferedRes": [{ "name": "water", "quantity": 2 }, { "name": "stone", "quantity": 1 }] }, { "source": "0", "target": "2", "transferedRes": [{ "name": "fire", "quantity": 3 }, { "name": "iron", "quantity": 4 }] }, { "source": "1", "target": "3", "transferedRes": [{ "name": "iron", "quantity": 1 }] }, { "source": "1", "target": "4", "transferedRes": [{ "name": "buttplug", "quantity": 1 }] }, { "source": "2", "target": "5", "transferedRes": [{ "name": "shit", "quantity": 1 }, { "name": "stone", "quantity": 2 }] }, { "source": "2", "target": "6", "transferedRes": [{ "name": "water", "quantity": 1 }] }, { "source": "3", "target": "7", "transferedRes": [{ "name": "buttplug", "quantity": 5 }] }, { "source": "6", "target": "7", "transferedRes": [{ "name": "iron", "quantity": 1 }] }, { "source": "5", "target": "7", "transferedRes": [{ "name": "shit", "quantity": 2 }] }, { "source": "4", "target": "8", "transferedRes": [{ "name": "fire", "quantity": 1 }] }, { "source": "5", "target": "9", "transferedRes": [{ "name": "shit", "quantity": 8 }, { "name": "water", "quantity": 1 }] }, { "source": "7", "target": "10", "transferedRes": [{ "name": "iron", "quantity": 3 }] }, { "source": "8", "target": "10", "transferedRes": [{ "name": "shit", "quantity": 2 }, { "name": "iron", "quantity": 1 }] }, { "source": "9", "target": "10", "transferedRes": [{ "name": "buttplug", "quantity": 1 }] }]
 //graph = { nodes: nodes, links: links };
-document.getElementById("saveGraphButton").addEventListener("click", function() {
-    apiRequest("POST", "api/savegraph", graph);
-    let audio = new Audio('/static/audio/savegraph.mp3');
-    audio.play();
-});
+
 
 // graph = { nodes: nodes, links: links };
 // если граф корректный, apiRequest получит строчку "correct", иначе "incorrect"

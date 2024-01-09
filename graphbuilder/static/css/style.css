@@ -17,7 +17,7 @@ line.link {
 
 line.optimized {
     marker-end: url(#arrowOptimized);
-    stroke: #d6d629;
+    stroke: #ffbb00;
 }
 
 line.new {
@@ -56,10 +56,13 @@ ul.entryExitPoint {
 
 svg {
     overflow: visible;
+    margin-top: 10px;
 }
 
 div.modal {
     display: none;
+    width: fit-content;
+    height: fit-content;
 }
 
 div.modal:hover {
@@ -147,4 +150,72 @@ div.modal:hover {
 #addLinkWindow div button,
 #addLinkWindow div input {
     margin-left: 10px;
+}
+
+.btn {
+    --bs-btn-color: white;
+    --bs-btn-bg: #2870c2;
+    --bs-btn-border-color: #2870c2;
+    --bs-btn-hover-color: #2870c2;
+    --bs-btn-hover-bg: white;
+    --bs-btn-hover-border-color: #2870c2;
+    --bs-btn-focus-shadow-rgb: 64, 101, 220;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #183bab;
+    --bs-btn-active-border-color: #1738a1;
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: #2870c2;
+    --bs-btn-disabled-border-color: #2870c2;
+    border: 2px solid #2870c2;
+    border-radius: 3px;
+    transition-duration: 0.4s;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    vertical-align: bottom;
+}
+
+select {
+    vertical-align: baseline;
+    height: 29px;
+}
+
+body div {
+    margin-bottom: 15px;
+}
+
+li {
+    margin-bottom: 3px;
+    margin-top: 3px;
+}
+
+#addNodeWindowButton,
+#changeNodeWindowButton,
+#addLinkWindowButton {
+    margin-top: 5px;
+}
+
+#buttonPanel {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+}
+
+#estimation {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+}
+
+input,
+select {
+    border-color: #2870c2;
+    border-radius: 3px;
+    border-width: 3px;
+}
+
+.entryExitPoint li {
+    margin: 0;
+    font-size: 15px;
+    line-height: 17px;
 }

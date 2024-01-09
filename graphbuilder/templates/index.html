@@ -7,90 +7,99 @@
 
     <link rel="stylesheet" href="{% static 'css/style.css' %}" /> {% load static %}
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <title>SupplyChains Graphbuilder</title>
 </head>
 
 <body>
-    <div id="addResWrap">
-        <input id="addResInput" type="text" placeholder="Resource name">
-        <button type="button" id="addResButton">Add new resource</button>
+    <div id="buttonPanel">
+        <div id="addResWrap">
+            <input id="addResInput" type="text" placeholder="Resource name">
+            <button type="button" id="addResButton" class="btn">Add new resource</button>
+        </div>
+        <div id="deleteResWrap">
+            <select id="deleteResSelect" class="resSelect">
+                <option id="deleteResOptionNone" class="deleteResOption">Choose resource</option>
+            </select>
+            <button type="button" id="deleteResButton" class="btn">Delete resource</button>
+        </div>
+        <div id="renameResWrap">
+            <select id="renameResSelect" class="resSelect">
+                <option id="renameResOptionNone" class="renameResOption">Choose resource</option>
+            </select>
+            <input id="renameResInput" type="text" placeholder="Rename to">
+            <button type="button" id="renameResButton" class="btn">Rename resource</button>
+        </div>
+        <div id="addNodeButtonWrap">
+            <button type="button" id="addNodeButton" class="btn">New node</button>
+        </div>
+        <div id="addLinkButtonWrap">
+            <button type="button" id="addLinkButton" class="btn">New link</button>
+        </div>
+        <div id="saveGraphWrap">
+            <button type="button" id="saveGraphButton" class="btn">Save graph</button>
+        </div>
+        <div id="optimizeGraphWrap">
+            <button type="button" id="optimizeGraphButton" class="btn">Optimize graph</button>
+        </div>
+        <div id="estimateGraphWrap">
+            <button type="button" id="estimateGraphButton" class="btn">Estimate graph</button>
+        </div>
     </div>
-    <div id="deleteResWrap">
-        <select id="deleteResSelect" class="resSelect">
-            <option id="deleteResOptionNone" class="deleteResOption">-none-</option>
-        </select>
-        <button type="button" id="deleteResButton">Delete resource</button>
-    </div>
-    <div id="renameResWrap">
-        <select id="renameResSelect" class="resSelect">
-            <option id="renameResOptionNone" class="renameResOption">-none-</option>
-        </select>
-        <input id="renameResInput" type="text" placeholder="Rename to">
-        <button type="button" id="renameResButton">Rename resource</button>
-    </div>
-    <div id="addNodeButtonWrap">
-        <button type="button" id="addNodeButton">New node</button>
-    </div>
-    <div id="addLinkButtonWrap">
-        <button type="button" id="addLinkButton">New link</button>
-    </div>
-    <div id="saveGraphWrap">
-        <button type="button" id="saveGraphButton">Save graph</button>
-    </div>
-    <div id="optimizeGraphWrap">
-        <button type="button" id="optimizeGraphButton">Optimize graph</button>
+    <div id="estimation">
+
     </div>
     <div id="contextMenu">
-        <button type="button" id="contextMenuButtonChange">Change</button>
-        <button type="button" id="contextMenuButtonDelete">Delete</button>
+        <button type="button" id="contextMenuButtonChange" class="btn">Change</button>
+        <button type="button" id="contextMenuButtonDelete" class="btn">Delete</button>
     </div>
     <div id="changeNodeWindowWrap">
         <div id="changeNodeWindow">
-            <div id="changeNodeNewResEatsText">Resources to eat</div><button type="button" id="changeNodeNewResEats">+</button>
+            <div id="changeNodeNewResEatsText">Resources to eat</div><button type="button" id="changeNodeNewResEats" class="btn">+</button>
             <ul id="changeNodeResEats">
                 <li>
                     <input type="text" placeholder="Resource quantity">
                     <select class="resSelect">
-                        <option>-none-</option>
+                        <option>Choose resource</option>
                     </select>
-                    <button type="button">X</button>
+                    <button type="button" class="btn">X</button>
                 </li>
             </ul>
-            <div id="changeNodeNewResGivesText">Resources to give</div><button type="button" id="changeNodeNewResGives">+</button>
+            <div id="changeNodeNewResGivesText">Resources to give</div><button type="button" id="changeNodeNewResGives" class="btn">+</button>
             <ul id="changeNodeResGives">
                 <li>
                     <input type="text" placeholder="Resource quantity">
                     <select class="resSelect">
-                        <option>-none-</option>
+                        <option>Choose resource</option>
                     </select>
-                    <button type="button">X</button>
+                    <button type="button" class="btn">X</button>
                 </li>
             </ul>
-            <button id="changeNodeWindowButton">Change node</button>
+            <button id="changeNodeWindowButton" class="btn">Change node</button>
         </div>
     </div>
     <div id="addNodeWindowWrap">
         <div id="addNodeWindow">
-            <div>Resources to eat</div><button type="button" id="addNodeNewResEats">+</button>
+            <div>Resources to eat</div><button type="button" id="addNodeNewResEats" class="btn">+</button>
             <ul id="addNodeResEats">
                 <li>
                     <input type="text" placeholder="Resource quantity">
                     <select class="resSelect">
-                        <option>-none-</option>
+                        <option>Choose resource</option>
                     </select>
-                    <button type="button">X</button>
+                    <button type="button" class="btn">X</button>
                 </li>
             </ul>
-            <div>Resources to give</div><button type="button" id="addNodeNewResGives">+</button>
+            <div>Resources to give</div><button type="button" id="addNodeNewResGives" class="btn">+</button>
             <ul id="addNodeResGives">
                 <li>
                     <input type="text" placeholder="Resource quantity">
                     <select class="resSelect">
-                        <option>-none-</option>
+                        <option>Choose resource</option>
                     </select>
-                    <button type="button">X</button>
+                    <button type="button" class="btn">X</button>
                 </li>
             </ul>
-            <button id="addNodeWindowButton">Add node</button>
+            <button id="addNodeWindowButton" class="btn">Add node</button>
         </div>
     </div>
     <div id="addLinkWindowWrap">
@@ -99,17 +108,17 @@
             <div>Source of link<input type="text" id="addLinkSourceInput"></div>
             <div>Target of link<input type="text" id="addLinkTargetInput"></div>
 
-            <div>Resources to transfer<button type="button" id="addLinkNewRes">+</button></div>
+            <div>Resources to transfer<button type="button" id="addLinkNewRes" class="btn">+</button></div>
             <ul id="addLinkRes">
                 <li>
                     <input type="text" placeholder="Resource quantity">
                     <select class="resSelect">
-                        <option>-none-</option>
+                        <option>Choose resource</option>
                     </select>
-                    <button type="button">X</button>
+                    <button type="button" class="btn">X</button>
                 </li>
             </ul>
-            <button id="addLinkWindowButton">Add link</button>
+            <button id="addLinkWindowButton" class="btn">Add link</button>
         </div>
     </div>
     <svg id="graph">
