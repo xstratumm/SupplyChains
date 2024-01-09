@@ -24,6 +24,7 @@ class GraphbuilderConfig(AppConfig):
                             { "id": "8", "neededRes": [res_dict(5,5),], "giveRes": [res_dict(4,4),res_dict(3,6),],},
                             { "id": "9", "neededRes": [res_dict(4,9),res_dict(1,5),], "giveRes": [res_dict(6,3),],},
                             { "id": "10", "neededRes": [res_dict(3,4),res_dict(4,2),res_dict(6,1),], "giveRes": [], "exitPoint": True,},
+                            # { "id": "11", "neededRes": [], "giveRes": [],}
                         ]
             init_links = [
                             { "source": "0", "target": "1", "transferedRes": [res_dict(1,2),res_dict(2,1),] },
