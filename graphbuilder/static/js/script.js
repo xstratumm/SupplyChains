@@ -74,6 +74,7 @@ function drawGraph(graph) {
         height = 500;
     svg.setAttribute('viewBox', (-width / 2) + " " + (-height / 2) + " " + (width) + " " + (height));
     svg.style.height = (window.innerHeight - 10) + "px";
+    svg.style.width = (window.innerWidth) + "px";
     let nodesEl = Array();
     let nodesTextsEl = Array();
     let linksEl = Array();
