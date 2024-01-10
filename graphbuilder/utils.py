@@ -14,38 +14,43 @@ def estimate_graph(nodes, links):
     estimation = {"optimals": []}
 
     for node in nodes:
-        node_leak, node_excess = dict(), dict()
+        node_leak, node_excess = [], []
 
         # Calculating excess
         if "exitPoint" not in node:
             node_output_links = list(filter(lambda link: True if link["source"] == node["id"] else False, links))
-            node_excess = {res["name"]: res["quantity"] for res in node["giveRes"]}
+            node_excess = [{"name": res["name"], "quantity": res["quantity"]} for res in node["giveRes"]]
 
             for link in node_output_links:
                 transfered_res = link["transferedRes"]
 
                 for res in transfered_res:
-                    node_excess[res["name"]] -= res["quantity"]
-                    if not node_excess[res["name"]]:
-                        node_excess.pop(res["name"])
+                    for res_id, node_excess_res in enumerate(node_excess):
+                        if node_excess_res["name"] == res["name"]:
+                            node_excess[res_id]["quantity"] -= res["quantity"]
+                            if not node_excess[res_id]["quantity"]:
+                                node_excess.pop(res_id)
         
         # Calculating leak
         if "entryPoint" not in node:
             node_input_links = list(filter(lambda link: True if link["target"] == node["id"] else False, links))
-            node_leak = {res["name"]: res["quantity"] for res in node["neededRes"]}
+            node_leak = [{"name": res["name"], "quantity": res["quantity"]} for res in node["neededRes"]]
 
             for link in node_input_links:
                 transfered_res = link["transferedRes"]
 
                 for res in transfered_res:
-                    node_leak[res["name"]] -= res["quantity"]
-                    if not node_leak[res["name"]]:
-                        node_leak.pop(res["name"])
+                    for res_id, node_leak_res in enumerate(node_leak):
+                        if node_leak_res["name"] == res["name"]:
+                            node_leak[res_id]["quantity"] -= res["quantity"]
+                            if not node_leak[res_id]["quantity"]:
+                                node_leak.pop(res_id)
         
         estimation[node["id"]] = {"leak": node_leak, "excess": node_excess}
         if not node_leak and not node_excess:
             estimation[node["id"]]["optimal"] = True
             estimation["optimals"] += [node["id"]]
+    print(estimation)
 
     return estimation
 

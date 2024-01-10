@@ -201,10 +201,35 @@ li {
     left: 10px;
 }
 
-#estimation {
+#estimationWrap {
     position: fixed;
     top: 10px;
     right: 10px;
+    display: none;
+    width: 15%;
+    max-height: 90%;
+    overflow: auto;
+    box-shadow: #2870c2 -8px 0px 4px;
+    border: 2px #2870c2 solid;
+    border-radius: 3px;
+}
+
+#estimationCloseButton {
+    float: right;
+}
+
+#estimationWrap p {
+    float: left;
+}
+
+#estimationCloseButton {}
+
+#estimationOuterList {
+    margin-top: 50px;
+}
+
+#estimationWrap div {
+    margin: 0;
 }
 
 input,
@@ -218,4 +243,9 @@ select {
     margin: 0;
     font-size: 15px;
     line-height: 17px;
+}
+
+.optimal {
+    stroke: #a262aa !important;
+    fill: #db2be8 !important;
 }

@@ -1064,6 +1064,11 @@ document.getElementById("saveGraphButton").addEventListener("click", function() 
     audio.play();
 });
 
+document.getElementById("estimationCloseButton").addEventListener("click", function() {
+    let wrap = document.getElementById("estimationWrap");
+    wrap.style.display = "none";
+});
+
 document.getElementById("estimateGraphButton").addEventListener("click", function() {
     let response = apiRequest("POST", "api/estimategraph", graph);
     if ("incorrect" == response) {
@@ -1071,7 +1076,43 @@ document.getElementById("estimateGraphButton").addEventListener("click", functio
         audio.play();
         return;
     }
-    document.getElementById("estimation")
+    let wrap = document.getElementById("estimationWrap");
+    wrap.style.display = "block";
+    let outerUl = document.getElementById("estimationOuterList");
+    outerUl.innerHTML = "";
+    let optimalsUl = document.getElementById("estimationOptimalsList");
+    optimalsUl.innerHTML = "";
+    let optimalsLabel = document.getElementById("estimationOptimalsLabel");
+    optimalsLabel.innerHTML = "";
+    graph.nodes.forEach((node) => {
+        if (response[node.id] != undefined) {
+            let li = document.createElement("li");
+            let idLabel = document.createElement("div");
+            idLabel.innerHTML = "Id: " + node.id;
+            li.appendChild(idLabel);
+            if (response[node.id].leak.length + response[node.id].excess.length == 0) {
+                let opt = document.getElementById(node.id);
+                opt.classList.add("optimal");
+                return;
+            }
+            if (response[node.id].leak.length != 0) {
+                let lackLabel = document.createElement("div");
+                lackLabel.innerHTML = "Lack of:";
+                li.appendChild(lackLabel);
+                li.innerHTML += arrResToUL(response[node.id].leak, "");
+            }
+            if (response[node.id].excess.length != 0) {
+                let excessLabel = document.createElement("div");
+                excessLabel.innerHTML = "Excess of:";
+                li.appendChild(excessLabel);
+                li.innerHTML += arrResToUL(response[node.id].excess, "");
+            }
+            outerUl.appendChild(li);
+        }
+    });
+    if (response.optimals.length != 0) {
+        optimalsLabel.innerHTML = "List of optimals: " + response.optimals.join(", ") + ".";
+    }
 })
 
 // маленький граф (без слоев, не заработает)
