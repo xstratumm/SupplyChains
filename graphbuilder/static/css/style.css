@@ -226,11 +226,12 @@ li {
     right: 10px;
     display: none;
     width: 15%;
-    max-height: 90%;
+    max-height: calc( 100% - 20px);
     overflow: auto;
-    box-shadow: #2870c2 -8px 0px 4px;
+    /*box-shadow: #2870c2 -8px 0px 4px;*/
     border: 2px #2870c2 solid;
     border-radius: 3px;
+    padding: 10px;
 }
 
 #estimationCloseButton {
@@ -244,7 +245,7 @@ li {
 #estimationCloseButton {}
 
 #estimationOuterList {
-    margin-top: 50px;
+    margin-top: 40px;
 }
 
 #estimationWrap div {
@@ -267,4 +268,15 @@ select {
 .optimal {
     stroke: #a262aa !important;
     fill: #db2be8 !important;
+}
+
+.plusButton {
+    line-height: 20px;
+    font-size: 20px;
+    padding-bottom: 6px;
+    vertical-align: middle;
+}
+
+.optimal .entryExitDiv {
+    border-color: #db2be8;
 }

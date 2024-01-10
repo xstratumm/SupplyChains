@@ -1117,13 +1117,13 @@ document.getElementById("estimateGraphButton").addEventListener("click", functio
             }
             if (response[node.id].leak.length != 0) {
                 let lackLabel = document.createElement("div");
-                lackLabel.innerHTML = "Lack of:";
+                lackLabel.innerHTML = "Lack:";
                 li.appendChild(lackLabel);
                 li.innerHTML += arrResToUL(response[node.id].leak, "");
             }
             if (response[node.id].excess.length != 0) {
                 let excessLabel = document.createElement("div");
-                excessLabel.innerHTML = "Excess of:";
+                excessLabel.innerHTML = "Excess:";
                 li.appendChild(excessLabel);
                 li.innerHTML += arrResToUL(response[node.id].excess, "");
             }
