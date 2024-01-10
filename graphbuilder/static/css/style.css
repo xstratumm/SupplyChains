@@ -25,6 +25,24 @@ line.new {
     stroke: purple;
 }
 
+path.link {
+    fill: none;
+    stroke: #4C8EDA;
+    stroke-width: 3px;
+    marker-end: url(#arrow);
+    cursor: pointer;
+}
+
+path.optimized {
+    marker-end: url(#arrowOptimized);
+    stroke: #ffbb00;
+}
+
+path.new {
+    marker-end: url(#arrowNew);
+    stroke: purple;
+}
+
 .entryExitDiv {
     text-align: center;
     border: 1px #3182bd solid;
