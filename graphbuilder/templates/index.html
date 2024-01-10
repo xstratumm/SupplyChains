@@ -45,8 +45,12 @@
             <button type="button" id="estimateGraphButton" class="btn">Estimate graph</button>
         </div>
     </div>
-    <div id="estimation">
-
+    <div id="estimationWrap">
+        <button type="button" id="estimationCloseButton" class="btn">X</button>
+        <p>Estimation</p>
+        <ul id="estimationOuterList"></ul>
+        <div id="estimationOptimalsLabel"></div>
+        <ul id="estimationOptimalsList"></ul>
     </div>
     <div id="contextMenu">
         <button type="button" id="contextMenuButtonChange" class="btn">Change</button>
@@ -54,7 +58,7 @@
     </div>
     <div id="changeNodeWindowWrap">
         <div id="changeNodeWindow">
-            <div id="changeNodeNewResEatsText">Resources to eat</div><button type="button" id="changeNodeNewResEats" class="btn">+</button>
+            <div id="changeNodeNewResEatsText">Resources to eat</div><button type="button" id="changeNodeNewResEats" class="btn plusButton">+</button>
             <ul id="changeNodeResEats">
                 <li>
                     <input type="text" placeholder="Resource quantity">
@@ -64,7 +68,7 @@
                     <button type="button" class="btn">X</button>
                 </li>
             </ul>
-            <div id="changeNodeNewResGivesText">Resources to give</div><button type="button" id="changeNodeNewResGives" class="btn">+</button>
+            <div id="changeNodeNewResGivesText">Resources to give</div><button type="button" id="changeNodeNewResGives" class="btn plusButton">+</button>
             <ul id="changeNodeResGives">
                 <li>
                     <input type="text" placeholder="Resource quantity">
@@ -79,7 +83,7 @@
     </div>
     <div id="addNodeWindowWrap">
         <div id="addNodeWindow">
-            <div>Resources to eat</div><button type="button" id="addNodeNewResEats" class="btn">+</button>
+            <div>Resources to eat</div><button type="button" id="addNodeNewResEats" class="btn plusButton">+</button>
             <ul id="addNodeResEats">
                 <li>
                     <input type="text" placeholder="Resource quantity">
@@ -89,7 +93,7 @@
                     <button type="button" class="btn">X</button>
                 </li>
             </ul>
-            <div>Resources to give</div><button type="button" id="addNodeNewResGives" class="btn">+</button>
+            <div>Resources to give</div><button type="button" id="addNodeNewResGives" class="btn plusButton">+</button>
             <ul id="addNodeResGives">
                 <li>
                     <input type="text" placeholder="Resource quantity">
@@ -108,7 +112,7 @@
             <div>Source of link<input type="text" id="addLinkSourceInput"></div>
             <div>Target of link<input type="text" id="addLinkTargetInput"></div>
 
-            <div>Resources to transfer<button type="button" id="addLinkNewRes" class="btn">+</button></div>
+            <div>Resources to transfer<button type="button" id="addLinkNewRes" class="btn plusButton">+</button></div>
             <ul id="addLinkRes">
                 <li>
                     <input type="text" placeholder="Resource quantity">

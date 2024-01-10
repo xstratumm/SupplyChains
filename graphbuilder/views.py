@@ -34,7 +34,7 @@ def api_estimate_graph(request):
     if not validate_graph(nodes, links):
         return Response("incorrect")
     
-    return Response(estimate_graph(nodes, links))
+    return Response(estimate_graph(nodes, links)["front"])
 
 
 @api_view(['POST'])

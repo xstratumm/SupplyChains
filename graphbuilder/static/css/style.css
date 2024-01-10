@@ -25,6 +25,24 @@ line.new {
     stroke: purple;
 }
 
+path.link {
+    fill: none;
+    stroke: #4C8EDA;
+    stroke-width: 3px;
+    marker-end: url(#arrow);
+    cursor: pointer;
+}
+
+path.optimized {
+    marker-end: url(#arrowOptimized);
+    stroke: #ffbb00;
+}
+
+path.new {
+    marker-end: url(#arrowNew);
+    stroke: purple;
+}
+
 .entryExitDiv {
     text-align: center;
     border: 1px #3182bd solid;
@@ -60,12 +78,13 @@ svg {
 }
 
 div.modal {
+    margin-top: 10px;
     display: none;
     width: fit-content;
     height: fit-content;
 }
 
-div.modal:hover {
+div.modal div:hover {
     display: block !important;
 }
 
@@ -201,10 +220,36 @@ li {
     left: 10px;
 }
 
-#estimation {
+#estimationWrap {
     position: fixed;
     top: 10px;
     right: 10px;
+    display: none;
+    width: 15%;
+    max-height: calc( 100% - 20px);
+    overflow: auto;
+    /*box-shadow: #2870c2 -8px 0px 4px;*/
+    border: 2px #2870c2 solid;
+    border-radius: 3px;
+    padding: 10px;
+}
+
+#estimationCloseButton {
+    float: right;
+}
+
+#estimationWrap p {
+    float: left;
+}
+
+#estimationCloseButton {}
+
+#estimationOuterList {
+    margin-top: 40px;
+}
+
+#estimationWrap div {
+    margin: 0;
 }
 
 input,
@@ -218,4 +263,20 @@ select {
     margin: 0;
     font-size: 15px;
     line-height: 17px;
+}
+
+.optimal {
+    stroke: #a262aa !important;
+    fill: #db2be8 !important;
+}
+
+.plusButton {
+    line-height: 20px;
+    font-size: 20px;
+    padding-bottom: 6px;
+    vertical-align: middle;
+}
+
+.optimal .entryExitDiv {
+    border-color: #db2be8;
 }

@@ -1,5 +1,12 @@
 "use strict";
 
+var cursor_x = -1;
+var cursor_y = -1;
+document.onmousemove = function(event) {
+    cursor_x = event.pageX;
+    cursor_y = event.pageY;
+}
+
 function apiRequest(reqType, URL, data) {
     let xhr = new XMLHttpRequest();
     xhr.open(reqType, URL, false);
@@ -66,6 +73,8 @@ function drawGraph(graph) {
     let width = 960,
         height = 500;
     svg.setAttribute('viewBox', (-width / 2) + " " + (-height / 2) + " " + (width) + " " + (height));
+    svg.style.height = (window.innerHeight - 10) + "px";
+    svg.style.width = (window.innerWidth) + "px";
     let nodesEl = Array();
     let nodesTextsEl = Array();
     let linksEl = Array();
@@ -220,8 +229,8 @@ function drawGraph(graph) {
 
             let boundBox = link.line.getBoundingClientRect();
             let modalWidth = modalsLinks[index].getBoundingClientRect().width;
-            modalsLinks[index].style.top = (boundBox.top + boundBox.bottom) / 2 + "px";
-            modalsLinks[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";
+            //modalsLinks[index].style.top = (boundBox.top + boundBox.bottom) / 2 + "px";
+            //modalsLinks[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";
         }
 
         nodesEl.forEach((node, index) => {
@@ -233,6 +242,7 @@ function drawGraph(graph) {
     });
 
     nodesEl.forEach((node, index) => {
+
         node.onmouseenter = function() {
             if (modalsNodes[index] != undefined) {
                 modalsNodes[index].style.display = "block";
@@ -241,7 +251,6 @@ function drawGraph(graph) {
                 modalsNodes[index].style.top = (boundBox.top + boundBox.bottom) / 2 + "px";
                 modalsNodes[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";
             }
-
         };
 
         node.onmouseleave = function() {
@@ -259,10 +268,10 @@ function drawGraph(graph) {
         link.line.onmouseenter = function() {
             if (modalsLinks[index] != undefined) {
                 modalsLinks[index].style.display = "block";
-                let boundBox = link.line.getBoundingClientRect();
+                /*let boundBox = link.line.getBoundingClientRect();
                 let modalWidth = modalsLinks[index].getBoundingClientRect().width;
                 modalsLinks[index].style.top = (boundBox.top + boundBox.bottom) / 2 + "px";
-                modalsLinks[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";
+                modalsLinks[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";*/
             }
 
         };
@@ -270,13 +279,25 @@ function drawGraph(graph) {
         link.line.onmouseleave = function() {
             if (modalsLinks[index] != undefined) {
                 modalsLinks[index].style.display = "none";
-                let boundBox = link.line.getBoundingClientRect();
+                /*let boundBox = link.line.getBoundingClientRect();
                 let modalWidth = modalsLinks[index].getBoundingClientRect().width;
                 modalsLinks[index].style.top = (boundBox.top + boundBox.bottom) / 2 + "px";
-                modalsLinks[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";
+                modalsLinks[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";*/
             }
         };
     });
+
+    document.onmousemove = function(event) {
+        linksEl.forEach((link, index) => {
+            if (modalsLinks[index] != undefined) {
+                let boundBox = link.line.getBoundingClientRect();
+                let modalWidth = modalsLinks[index].getBoundingClientRect().width;
+                modalsLinks[index].style.top = event.pageY + "px";
+                modalsLinks[index].style.left = (event.pageX - modalWidth / 2) + "px";
+            }
+        });
+    };
+
 
     nodesEl.forEach((node, nodeIndex) => {
         node.addEventListener("click", function(event) {
@@ -1064,6 +1085,11 @@ document.getElementById("saveGraphButton").addEventListener("click", function() 
     audio.play();
 });
 
+document.getElementById("estimationCloseButton").addEventListener("click", function() {
+    let wrap = document.getElementById("estimationWrap");
+    wrap.style.display = "none";
+});
+
 document.getElementById("estimateGraphButton").addEventListener("click", function() {
     let response = apiRequest("POST", "api/estimategraph", graph);
     if ("incorrect" == response) {
@@ -1071,7 +1097,45 @@ document.getElementById("estimateGraphButton").addEventListener("click", functio
         audio.play();
         return;
     }
-    document.getElementById("estimation")
+    let wrap = document.getElementById("estimationWrap");
+    wrap.style.display = "block";
+    let outerUl = document.getElementById("estimationOuterList");
+    outerUl.innerHTML = "";
+    let optimalsUl = document.getElementById("estimationOptimalsList");
+    optimalsUl.innerHTML = "";
+    let optimalsLabel = document.getElementById("estimationOptimalsLabel");
+    optimalsLabel.innerHTML = "";
+    graph.nodes.forEach((node) => {
+        if (response[node.id] != undefined) {
+            let li = document.createElement("li");
+            let idLabel = document.createElement("div");
+            idLabel.innerHTML = "Id: " + node.id;
+            li.appendChild(idLabel);
+            if (response[node.id].leak.length + response[node.id].excess.length == 0) {
+                let opt = document.getElementById(node.id);
+                opt.classList.add("optimal");
+                return;
+            }
+            if (response[node.id].leak.length != 0) {
+                let lackLabel = document.createElement("div");
+                lackLabel.innerHTML = "Lack:";
+                li.appendChild(lackLabel);
+                li.innerHTML += arrResToUL(response[node.id].leak, "");
+            }
+            if (response[node.id].excess.length != 0) {
+                let excessLabel = document.createElement("div");
+                excessLabel.innerHTML = "Excess:";
+                li.appendChild(excessLabel);
+                li.innerHTML += arrResToUL(response[node.id].excess, "");
+            }
+            outerUl.appendChild(li);
+        }
+    });
+    if (response.optimals.length != 0) {
+        optimalsLabel.innerHTML = "List of optimals: " + response.optimals.join(", ") + ".";
+    }
+    let audio = new Audio('/static/audio/estimation.mp3');
+    audio.play();
 })
 
 // маленький граф (без слоев, не заработает)

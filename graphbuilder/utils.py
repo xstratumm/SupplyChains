@@ -6,52 +6,66 @@ import re
 
 
 def estimate_graph(nodes, links):
-    """Analyze graph for leaks and excess, find optimal nodes.
+    """Analyze graph for lack and excess, find optimal nodes.
 
     Returns:
         Graph analysis info.
     """
-    estimation = {"optimals": []}
+    estimation = {"front": {"optimals": []}, "back": {"optimals": []}}
 
     for node in nodes:
-        node_leak, node_excess = dict(), dict()
+        node_leak_front, node_excess_front = [], []
+        node_leak_back, node_excess_back = dict(), dict()
 
         # Calculating excess
         if "exitPoint" not in node:
             node_output_links = list(filter(lambda link: True if link["source"] == node["id"] else False, links))
-            node_excess = {res["name"]: res["quantity"] for res in node["giveRes"]}
+            node_excess_back = {res["name"]: res["quantity"] for res in node["giveRes"]}
+            node_excess_front = [{"name": res["name"], "quantity": res["quantity"]} for res in node["giveRes"]]
 
             for link in node_output_links:
                 transfered_res = link["transferedRes"]
 
                 for res in transfered_res:
-                    node_excess[res["name"]] -= res["quantity"]
-                    if not node_excess[res["name"]]:
-                        node_excess.pop(res["name"])
+                    for res_id, node_excess_res in enumerate(node_excess_front):
+                        if node_excess_res["name"] == res["name"]:
+                            node_excess_front[res_id]["quantity"] -= res["quantity"]
+                            node_excess_back[res["name"]] -= res["quantity"]
+                            if not node_excess_front[res_id]["quantity"]:
+                                node_excess_front.pop(res_id)
+                                node_excess_back.pop(res["name"])
+                            
         
-        # Calculating leak
+        # Calculating lack
         if "entryPoint" not in node:
             node_input_links = list(filter(lambda link: True if link["target"] == node["id"] else False, links))
-            node_leak = {res["name"]: res["quantity"] for res in node["neededRes"]}
+            node_leak_back = {res["name"]: res["quantity"] for res in node["neededRes"]}
+            node_leak_front = [{"name": res["name"], "quantity": res["quantity"]} for res in node["neededRes"]]
 
             for link in node_input_links:
                 transfered_res = link["transferedRes"]
 
                 for res in transfered_res:
-                    node_leak[res["name"]] -= res["quantity"]
-                    if not node_leak[res["name"]]:
-                        node_leak.pop(res["name"])
+                    for res_id, node_leak_res in enumerate(node_leak_front):
+                        if node_leak_res["name"] == res["name"]:
+                            node_leak_front[res_id]["quantity"] -= res["quantity"]
+                            node_leak_back[res["name"]] -= res["quantity"]
+                            if not node_leak_front[res_id]["quantity"]:
+                                node_leak_front.pop(res_id)
+                                node_leak_back.pop(res["name"])
         
-        estimation[node["id"]] = {"leak": node_leak, "excess": node_excess}
-        if not node_leak and not node_excess:
-            estimation[node["id"]]["optimal"] = True
-            estimation["optimals"] += [node["id"]]
+        estimation["front"][node["id"]] = {"leak": node_leak_front, "excess": node_excess_front}
+        estimation["back"][node["id"]] = {"leak": node_leak_back, "excess": node_excess_back}
+        if not node_leak_front and not node_excess_front:
+            for type_str in ("front", "back"):
+                estimation[type_str][node["id"]]["optimal"] = True
+                estimation[type_str]["optimals"] += [node["id"]]
 
     return estimation
 
 
 def optimize_graph(nodes, links):
-    estimation = estimate_graph(nodes, links)
+    estimation = estimate_graph(nodes, links)["back"]
     optimized_links, new_links = [], []
 
     # Optimizing existing links
@@ -74,7 +88,7 @@ def optimize_graph(nodes, links):
             links[link_index] = link
             optimized_links += [link]
             # print(link)
-            estimation = estimate_graph(nodes, links)
+            estimation = estimate_graph(nodes, links)["back"]
 
     # Creating new links
     for node in nodes:
@@ -112,7 +126,7 @@ def optimize_graph(nodes, links):
                 links += [new_link]
                 new_links += [new_link]
                 # print(new_link)
-                estimation = estimate_graph(nodes, links)
+                estimation = estimate_graph(nodes, links)["back"]
     
     return {"graph": {"nodes": nodes, "links": links}, "optimizedLinks": optimized_links, "newLinks": new_links}
 
