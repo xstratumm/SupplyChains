@@ -1,5 +1,12 @@
 "use strict";
 
+var cursor_x = -1;
+var cursor_y = -1;
+document.onmousemove = function(event) {
+    cursor_x = event.pageX;
+    cursor_y = event.pageY;
+}
+
 function apiRequest(reqType, URL, data) {
     let xhr = new XMLHttpRequest();
     xhr.open(reqType, URL, false);
@@ -66,6 +73,7 @@ function drawGraph(graph) {
     let width = 960,
         height = 500;
     svg.setAttribute('viewBox', (-width / 2) + " " + (-height / 2) + " " + (width) + " " + (height));
+    svg.style.height = (window.innerHeight - 10) + "px";
     let nodesEl = Array();
     let nodesTextsEl = Array();
     let linksEl = Array();
@@ -220,8 +228,8 @@ function drawGraph(graph) {
 
             let boundBox = link.line.getBoundingClientRect();
             let modalWidth = modalsLinks[index].getBoundingClientRect().width;
-            modalsLinks[index].style.top = (boundBox.top + boundBox.bottom) / 2 + "px";
-            modalsLinks[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";
+            //modalsLinks[index].style.top = (boundBox.top + boundBox.bottom) / 2 + "px";
+            //modalsLinks[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";
         }
 
         nodesEl.forEach((node, index) => {
@@ -233,6 +241,7 @@ function drawGraph(graph) {
     });
 
     nodesEl.forEach((node, index) => {
+
         node.onmouseenter = function() {
             if (modalsNodes[index] != undefined) {
                 modalsNodes[index].style.display = "block";
@@ -241,7 +250,6 @@ function drawGraph(graph) {
                 modalsNodes[index].style.top = (boundBox.top + boundBox.bottom) / 2 + "px";
                 modalsNodes[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";
             }
-
         };
 
         node.onmouseleave = function() {
@@ -259,10 +267,10 @@ function drawGraph(graph) {
         link.line.onmouseenter = function() {
             if (modalsLinks[index] != undefined) {
                 modalsLinks[index].style.display = "block";
-                let boundBox = link.line.getBoundingClientRect();
+                /*let boundBox = link.line.getBoundingClientRect();
                 let modalWidth = modalsLinks[index].getBoundingClientRect().width;
                 modalsLinks[index].style.top = (boundBox.top + boundBox.bottom) / 2 + "px";
-                modalsLinks[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";
+                modalsLinks[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";*/
             }
 
         };
@@ -270,13 +278,25 @@ function drawGraph(graph) {
         link.line.onmouseleave = function() {
             if (modalsLinks[index] != undefined) {
                 modalsLinks[index].style.display = "none";
-                let boundBox = link.line.getBoundingClientRect();
+                /*let boundBox = link.line.getBoundingClientRect();
                 let modalWidth = modalsLinks[index].getBoundingClientRect().width;
                 modalsLinks[index].style.top = (boundBox.top + boundBox.bottom) / 2 + "px";
-                modalsLinks[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";
+                modalsLinks[index].style.left = ((boundBox.left + boundBox.right - modalWidth) / 2) + "px";*/
             }
         };
     });
+
+    document.onmousemove = function(event) {
+        linksEl.forEach((link, index) => {
+            if (modalsLinks[index] != undefined) {
+                let boundBox = link.line.getBoundingClientRect();
+                let modalWidth = modalsLinks[index].getBoundingClientRect().width;
+                modalsLinks[index].style.top = event.pageY + "px";
+                modalsLinks[index].style.left = (event.pageX - modalWidth / 2) + "px";
+            }
+        });
+    };
+
 
     nodesEl.forEach((node, nodeIndex) => {
         node.addEventListener("click", function(event) {
@@ -1113,6 +1133,8 @@ document.getElementById("estimateGraphButton").addEventListener("click", functio
     if (response.optimals.length != 0) {
         optimalsLabel.innerHTML = "List of optimals: " + response.optimals.join(", ") + ".";
     }
+    let audio = new Audio('/static/audio/estimation.mp3');
+    audio.play();
 })
 
 // маленький граф (без слоев, не заработает)

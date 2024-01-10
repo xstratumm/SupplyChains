@@ -60,12 +60,13 @@ svg {
 }
 
 div.modal {
+    margin-top: 10px;
     display: none;
     width: fit-content;
     height: fit-content;
 }
 
-div.modal:hover {
+div.modal div:hover {
     display: block !important;
 }
 
