@@ -285,9 +285,9 @@ def decode_res(res_code):
             1: "water",
             2: "stone",
             3: "iron",
-            4: "shit",
+            4: "dwarf",
             5: "fire",
-            6: "buttplug",
+            6: "jorik",
            }[res_code]
 
 

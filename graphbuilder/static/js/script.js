@@ -73,8 +73,8 @@ function drawGraph(graph) {
     let width = 960,
         height = 500;
     svg.setAttribute('viewBox', (-width / 2) + " " + (-height / 2) + " " + (width) + " " + (height));
-    svg.style.height = (window.innerHeight - 10) + "px";
-    svg.style.width = (window.innerWidth) + "px";
+    svg.style.height = (window.innerHeight - 20) + "px";
+    svg.style.width = (window.innerWidth - 20) + "px";
     let nodesEl = Array();
     let nodesTextsEl = Array();
     let linksEl = Array();

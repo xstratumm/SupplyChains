@@ -236,6 +236,8 @@ li {
 
 #estimationCloseButton {
     float: right;
+    position: fixed;
+    right: 38px;
 }
 
 #estimationWrap p {
